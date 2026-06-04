@@ -1,3 +1,59 @@
+/* ===== 用户信息栏 ===== */
+.user-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16rpx 0 20rpx;
+}
+
+.user-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.user-bar-avatar {
+  font-size: 44rpx;
+  width: 72rpx;
+  height: 72rpx;
+  background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4rpx 12rpx rgba(16,185,129,0.2);
+}
+
+.user-bar-info {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.user-bar-name {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.user-bar-badge {
+  font-size: 20rpx;
+  color: #f59e0b;
+  background: #fef3c7;
+  padding: 2rpx 14rpx;
+  border-radius: 16rpx;
+  font-weight: 500;
+}
+
+.user-bar-view {
+  font-size: 22rpx;
+  color: #10b981;
+  background: #d1fae5;
+  padding: 6rpx 18rpx;
+  border-radius: 20rpx;
+  font-weight: 500;
+}
+
 /* ===== 今日统计卡片 ===== */
 .stats-card {
   background: linear-gradient(135deg, #10b981, #0ea5e9);

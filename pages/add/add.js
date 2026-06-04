@@ -1,3 +1,4 @@
+var app = getApp();
 var sports = require('../../utils/sports');
 var calorie = require('../../utils/calorie');
 var storage = require('../../utils/storage');
@@ -21,6 +22,7 @@ Page({
   },
 
   onLoad: function() {
+    if (!app.checkLogin()) return;
     var now = new Date();
     var today = this.formatDate(now);
     var rawList = sports.getAllSports();

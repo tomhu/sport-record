@@ -1,3 +1,4 @@
+var app = getApp();
 var storage = require('../../utils/storage');
 var calorie = require('../../utils/calorie');
 
@@ -7,14 +8,29 @@ Page({
     todayStats: { count: 0, duration: 0, totalCount: 0, distance: 0, calories: 0 },
     groupedHistory: [],
     isEmpty: true,
-    todayDate: ''
+    todayDate: '',
+    currentUser: null,
+    viewMode: 'self'
   },
 
-  onShow: function () { this.loadData(); },
-  onPullDownRefresh: function () { this.loadData(); wx.stopPullDownRefresh(); },
+  onShow: function () {
+    // 登录检查
+    var user = app.checkLogin();
+    if (!user) return;
+    this.loadData();
+  },
+
+  onPullDownRefresh: function () {
+    var user = app.checkLogin();
+    if (!user) return;
+    this.loadData();
+    wx.stopPullDownRefresh();
+  },
 
   loadData: function () {
-    var records = storage.getRecords();
+    var user = storage.getCurrentUser();
+    var viewMode = storage.getAdminViewMode();
+    var records = storage.getRecordsByView(viewMode);
     var today = this.getTodayStr();
     var todayRecords = records.filter(function (r) { return r.date === today; });
     var historyRecords = records.filter(function (r) { return r.date !== today; });
@@ -23,6 +39,15 @@ Page({
     var month = now.getMonth() + 1;
     var day = now.getDate();
     var days = ['日', '一', '二', '三', '四', '五', '六'];
+
+    // 管理员视图下显示查看范围的标签
+    var viewLabel = '';
+    if (viewMode === 'all') {
+      viewLabel = '全部用户';
+    } else if (viewMode !== 'self') {
+      var targetUser = storage.getUserById(viewMode);
+      viewLabel = targetUser ? targetUser.name : '指定用户';
+    }
 
     this.setData({
       todayRecords: todayRecords,
@@ -35,7 +60,10 @@ Page({
         calories: calorie.calculateTotalCalories(todayRecords)
       },
       groupedHistory: this.groupByDate(historyRecords),
-      isEmpty: records.length === 0
+      isEmpty: records.length === 0,
+      currentUser: user,
+      viewMode: viewMode,
+      viewLabel: viewLabel
     });
   },
 
@@ -62,7 +90,10 @@ Page({
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
   },
 
-  onAdd: function () { wx.navigateTo({ url: '/pages/add/add' }); },
+  onAdd: function () {
+    if (!app.checkLogin()) return;
+    wx.navigateTo({ url: '/pages/add/add' });
+  },
 
   onDeleteRecord: function (e) {
     storage.deleteRecord(e.detail.id);

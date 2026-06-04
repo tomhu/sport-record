@@ -1,3 +1,4 @@
+var app = getApp();
 var storage = require('../../utils/storage');
 var chart = require('../../utils/chart');
 
@@ -18,6 +19,7 @@ Page({
   },
 
   onShow: function () {
+    if (!app.checkLogin()) return;
     this.loadData();
   },
 
@@ -30,7 +32,8 @@ Page({
   },
 
   loadData: function () {
-    var allRecords = storage.getRecords();
+    var viewMode = storage.getAdminViewMode();
+    var allRecords = storage.getRecordsByView(viewMode);
     if (!allRecords || allRecords.length === 0) {
       this.setData({ hasData: false, loaded: true });
       return;

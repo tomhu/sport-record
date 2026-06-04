@@ -1,10 +1,15 @@
+var app = getApp();
 var storage = require('../../utils/storage');
 var sportsData = require('../../utils/sports');
 
 Page({
   data: {
     weight: 65,
-    allSports: [],          // 预设(含编辑覆盖) + 自定义
+    currentUser: null,
+    allUsers: [],
+    viewMode: 'self',
+    // 运动
+    allSports: [],
     customSports: [],
     totalRecords: 0,
     // 编辑弹窗
@@ -14,7 +19,7 @@ Page({
     editMeasureType: 'duration',
     editKcalPerUnit: '',
     editCaloriePerKm: '',
-    // 自定义运动表单
+    // 自定义运动
     customName: '',
     customIcon: '',
     customMet: '',
@@ -22,17 +27,19 @@ Page({
     customKcalPerUnit: ''
   },
 
-  onShow: function() {
+  onShow: function () {
+    if (!app.checkLogin()) return;
     this.refresh();
   },
 
-  refresh: function() {
+  refresh: function () {
+    var user = storage.getCurrentUser();
     var settings = storage.getSettings();
-    var records = storage.getRecords();
+    var records = storage.getRecords(); // 获取全部记录以统计
     var customs = sportsData.getCustomSports();
 
     var all = sportsData.getAllSports();
-    var allSports = all.map(function(s) {
+    var allSports = all.map(function (s) {
       var copy = {};
       for (var k in s) { if (s.hasOwnProperty(k)) copy[k] = s[k]; }
       copy.shortName = s.name.replace(/[^一-龥]/g, '');
@@ -43,29 +50,60 @@ Page({
 
     this.setData({
       weight: settings.weight || 65,
+      currentUser: user,
+      viewMode: settings.adminViewMode || 'self',
       allSports: allSports,
       customSports: customs,
-      totalRecords: records.length
+      totalRecords: records.length,
+      allUsers: storage.getUsersWithStats()
     });
+
+    // 管理员视角：高亮当前选中的用户
+    if (user && user.isAdmin) {
+      this.setData({ allUsers: storage.getUsersWithStats() });
+    }
+  },
+
+  // ========== 用户管理 ==========
+
+  onSwitchUser: function () {
+    wx.navigateTo({ url: '/pages/login/login' });
+  },
+
+  onSelectViewUser: function (e) {
+    var userId = e.currentTarget.dataset.userid;
+    if (userId === '__all__') {
+      storage.setAdminViewMode('all');
+    } else {
+      storage.setAdminViewMode(userId);
+    }
+    this.refresh();
+    wx.showToast({ title: '已切换视图', icon: 'success' });
+  },
+
+  onResetView: function () {
+    storage.setAdminViewMode('self');
+    this.refresh();
+    wx.showToast({ title: '已切换回个人视图', icon: 'success' });
   },
 
   // ========== 体重 ==========
-  onWeightInput: function(e) {
+  onWeightInput: function (e) {
     var val = parseInt(e.detail.value);
     this.setData({ weight: val || 65 });
   },
-  onSaveWeight: function() {
+  onSaveWeight: function () {
     var weight = this.data.weight;
     if (weight < 30 || weight > 200) {
       wx.showToast({ title: '体重应在30-200kg之间', icon: 'none' });
       return;
     }
-    storage.saveSettings({ weight: weight });
+    storage.saveSettings({ weight: weight, adminViewMode: this.data.viewMode });
     wx.showToast({ title: '体重已保存', icon: 'success' });
   },
 
   // ========== 编辑运动 ==========
-  onEditSport: function(e) {
+  onEditSport: function (e) {
     var key = e.currentTarget.dataset.key;
     var sport = sportsData.getSportByKey(key);
     if (!sport) return;
@@ -79,26 +117,20 @@ Page({
     });
   },
 
-  onCloseEdit: function() {
+  onCloseEdit: function () {
     this.setData({ showEditModal: false, editSport: null });
   },
 
-  onEditMetInput: function(e) {
-    this.setData({ editMet: e.detail.value });
-  },
-  onEditKcalInput: function(e) {
-    this.setData({ editKcalPerUnit: e.detail.value });
-  },
-  onEditCalorieKmInput: function(e) {
-    this.setData({ editCaloriePerKm: e.detail.value });
-  },
-  onEditMeasureChange: function(e) {
+  onEditMetInput: function (e) { this.setData({ editMet: e.detail.value }); },
+  onEditKcalInput: function (e) { this.setData({ editKcalPerUnit: e.detail.value }); },
+  onEditCalorieKmInput: function (e) { this.setData({ editCaloriePerKm: e.detail.value }); },
+  onEditMeasureChange: function (e) {
     var types = ['duration', 'count', 'both'];
     var idx = parseInt(e.detail.value);
     this.setData({ editMeasureType: types[idx] || 'duration' });
   },
 
-  onSaveSportEdit: function() {
+  onSaveSportEdit: function () {
     var s = this.data.editSport;
     if (!s) return;
     var met = parseFloat(this.data.editMet);
@@ -111,20 +143,13 @@ Page({
       return;
     }
 
-    var patch = {
-      met: met,
-      measureType: mt,
-      kcalPerUnit: kcal,
-      caloriePerKm: calKm
-    };
-
-    sportsData.updateSport(s.key, patch);
+    sportsData.updateSport(s.key, { met: met, measureType: mt, kcalPerUnit: kcal, caloriePerKm: calKm });
     this.setData({ showEditModal: false, editSport: null });
     this.refresh();
     wx.showToast({ title: '已更新', icon: 'success' });
   },
 
-  onResetSportEdit: function() {
+  onResetSportEdit: function () {
     var s = this.data.editSport;
     if (!s) return;
     var that = this;
@@ -132,7 +157,7 @@ Page({
       title: '恢复默认',
       content: '确定要恢复「' + s.name + '」的默认参数吗？',
       confirmColor: '#F44336',
-      success: function(res) {
+      success: function (res) {
         if (res.confirm) {
           sportsData.resetSportEdit(s.key);
           that.setData({ showEditModal: false, editSport: null });
@@ -144,17 +169,17 @@ Page({
   },
 
   // ========== 自定义运动 ==========
-  onCustomNameInput: function(e) { this.setData({ customName: e.detail.value }); },
-  onCustomIconInput: function(e) { this.setData({ customIcon: e.detail.value }); },
-  onCustomMetInput: function(e) { this.setData({ customMet: e.detail.value }); },
-  onCustomKcalInput: function(e) { this.setData({ customKcalPerUnit: e.detail.value }); },
-  onMeasureTypeChange: function(e) {
+  onCustomNameInput: function (e) { this.setData({ customName: e.detail.value }); },
+  onCustomIconInput: function (e) { this.setData({ customIcon: e.detail.value }); },
+  onCustomMetInput: function (e) { this.setData({ customMet: e.detail.value }); },
+  onCustomKcalInput: function (e) { this.setData({ customKcalPerUnit: e.detail.value }); },
+  onMeasureTypeChange: function (e) {
     var types = ['duration', 'count', 'both'];
     var idx = parseInt(e.detail.value);
     this.setData({ customMeasureType: types[idx] || 'count' });
   },
 
-  onAddCustomSport: function() {
+  onAddCustomSport: function () {
     var name = (this.data.customName || '').trim();
     var icon = (this.data.customIcon || '').trim();
     var met = parseFloat(this.data.customMet);
@@ -169,12 +194,8 @@ Page({
     }
 
     sportsData.addCustomSport({
-      name: icon + ' ' + name,
-      icon: icon,
-      met: met,
-      measureType: mt,
-      kcalPerUnit: kcal,
-      caloriePerKm: 0
+      name: icon + ' ' + name, icon: icon, met: met,
+      measureType: mt, kcalPerUnit: kcal, caloriePerKm: 0
     });
 
     this.setData({
@@ -185,14 +206,14 @@ Page({
     wx.showToast({ title: '已添加 ' + name, icon: 'success' });
   },
 
-  onDeleteCustom: function(e) {
+  onDeleteCustom: function (e) {
     var key = e.currentTarget.dataset.key;
     var that = this;
     wx.showModal({
       title: '确认删除',
       content: '确定要删除这个自定义运动吗？',
       confirmColor: '#F44336',
-      success: function(res) {
+      success: function (res) {
         if (res.confirm) {
           sportsData.deleteCustomSport(key);
           that.refresh();
@@ -203,7 +224,7 @@ Page({
   },
 
   // ========== 数据管理 ==========
-  onClearRecords: function() {
+  onClearRecords: function () {
     if (this.data.totalRecords === 0) {
       wx.showToast({ title: '没有可清除的记录', icon: 'none' });
       return;
@@ -214,7 +235,7 @@ Page({
       content: '确定要清除所有运动记录吗？此操作不可恢复。',
       confirmText: '确认清除',
       confirmColor: '#F44336',
-      success: function(res) {
+      success: function (res) {
         if (res.confirm) {
           storage.saveRecords([]);
           that.setData({ totalRecords: 0 });

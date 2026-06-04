@@ -1,12 +1,77 @@
 <view class="container">
 
+  <!-- ===== 用户信息 ===== -->
+  <view class="card">
+    <view class="card-header">
+      <view class="card-header-icon">👤</view>
+      <text>当前用户</text>
+    </view>
+    <view class="user-profile">
+      <text class="user-avatar">{{currentUser.avatar || '🏃'}}</text>
+      <view class="user-info">
+        <text class="user-name">{{currentUser.name || '未登录'}}</text>
+        <text wx:if="{{currentUser.isAdmin}}" class="user-badge">管理员</text>
+        <text wx:if="{{!currentUser.isAdmin}}" class="user-badge user-badge-normal">普通用户</text>
+      </view>
+      <button class="btn-outline btn-sm" bindtap="onSwitchUser">切换</button>
+    </view>
+  </view>
+
+  <!-- ===== 管理员面板 ===== -->
+  <view wx:if="{{currentUser && currentUser.isAdmin}}" class="card">
+    <view class="card-header">
+      <view class="card-header-icon">🛡️</view>
+      <text>管理员面板</text>
+    </view>
+    <view class="section-tip">选择要查看的数据范围</view>
+
+    <view class="view-mode-list">
+      <!-- 自己 -->
+      <view class="view-mode-item {{viewMode === 'self' ? 'view-mode-active' : ''}}" bindtap="onResetView">
+        <text class="view-mode-avatar">{{currentUser.avatar}}</text>
+        <view class="view-mode-info">
+          <text class="view-mode-name">我的记录</text>
+          <text class="view-mode-desc">仅查看自己的运动数据</text>
+        </view>
+        <text wx:if="{{viewMode === 'self'}}" class="view-mode-check">✓</text>
+      </view>
+
+      <!-- 全部用户 -->
+      <view class="view-mode-item {{viewMode === 'all' ? 'view-mode-active' : ''}}" data-userid="__all__" bindtap="onSelectViewUser">
+        <text class="view-mode-avatar">👥</text>
+        <view class="view-mode-info">
+          <text class="view-mode-name">全部用户</text>
+          <text class="view-mode-desc">查看所有用户的运动数据</text>
+        </view>
+        <text wx:if="{{viewMode === 'all'}}" class="view-mode-check">✓</text>
+      </view>
+
+      <!-- 各用户 -->
+      <view
+        wx:for="{{allUsers}}"
+        wx:key="userId"
+        class="view-mode-item {{viewMode === item.userId ? 'view-mode-active' : ''}}"
+        data-userid="{{item.userId}}"
+        bindtap="onSelectViewUser"
+      >
+        <text class="view-mode-avatar">{{item.avatar}}</text>
+        <view class="view-mode-info">
+          <text class="view-mode-name">{{item.name}}</text>
+          <text class="view-mode-desc">{{item.recordCount || 0}} 条记录</text>
+        </view>
+        <text wx:if="{{item.isAdmin}}" class="view-mode-tag">管理</text>
+        <text wx:if="{{viewMode === item.userId}}" class="view-mode-check">✓</text>
+      </view>
+    </view>
+  </view>
+
   <!-- ===== 体重设置 ===== -->
   <view class="card">
     <view class="card-header">
       <view class="card-header-icon">⚖️</view>
       <text>体重设置</text>
     </view>
-    <view class="weight-desc">用于计算运动消耗热量</view>
+    <view class="weight-desc">用于计算运动消耗热量（仅影响你的记录）</view>
     <view class="weight-input-row">
       <view class="weight-input-wrap">
         <input class="form-input weight-input" type="digit" placeholder="输入体重" value="{{weight}}" bindinput="onWeightInput" />
@@ -23,7 +88,6 @@
       <text>运动类型管理</text>
     </view>
     <view class="section-tip">点击「编辑」可修改 MET 值、计量方式等参数</view>
-
     <view class="sport-list">
       <view wx:for="{{allSports}}" wx:key="key" class="sport-list-item">
         <view class="sport-list-info">
@@ -51,7 +115,6 @@
       <view class="card-header-icon">✨</view>
       <text>添加自定义运动</text>
     </view>
-
     <view class="form-group">
       <view class="form-label-sm">运动名称</view>
       <input class="form-input" placeholder="如：平板支撑" value="{{customName}}" bindinput="onCustomNameInput" />
@@ -86,7 +149,7 @@
       <text>数据管理</text>
     </view>
     <view class="data-info">
-      当前共有 <text class="data-count">{{totalRecords}}</text> 条运动记录
+      全部共有 <text class="data-count">{{totalRecords}}</text> 条运动记录
     </view>
     <button class="btn-danger" bindtap="onClearRecords">清除所有记录</button>
   </view>
@@ -98,7 +161,7 @@
     <view class="about-formula">计时 · MET × 体重(kg) × 时长(h)</view>
     <view class="about-formula">距离 · 距离(km) × 体重(kg) × 每km消耗</view>
     <view class="about-formula">计次 · 次数 × 单次消耗(千卡)</view>
-    <view class="about-version">v4.0.0 · 本地数据库</view>
+    <view class="about-version">v4.0.0 · 本地数据库 · 多用户</view>
   </view>
 
   <view style="height: 40rpx;"></view>

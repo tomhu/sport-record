@@ -1,0 +1,56 @@
+<view class="login-container">
+
+  <!-- ===== 标题 ===== -->
+  <view class="login-header">
+    <text class="login-app-icon">🏃‍♂️</text>
+    <text class="login-app-title">运动记录</text>
+    <text class="login-app-desc">记录每一次运动，见证每一步成长</text>
+  </view>
+
+  <!-- ===== 头像选择 ===== -->
+  <view class="avatar-section" bindtap="onPickAvatar">
+    <view class="avatar-wrap">
+      <text class="avatar-text">{{avatar}}</text>
+    </view>
+    <text class="avatar-hint">点击更换头像</text>
+  </view>
+
+  <!-- ===== 昵称输入 ===== -->
+  <view class="login-form">
+    <text class="login-label">你的昵称</text>
+    <view class="login-input-wrap">
+      <input
+        class="login-input"
+        type="nickname"
+        placeholder="输入或使用微信昵称"
+        value="{{nickname}}"
+        bindinput="onNicknameInput"
+        bindblur="onNicknameBlur"
+      />
+      <text wx:if="{{nickname}}" class="login-input-clear" bindtap="onClearNickname">×</text>
+    </view>
+  </view>
+
+  <!-- ===== 已有用户列表 ===== -->
+  <view wx:if="{{existingUsers.length > 0}}" class="user-list-section">
+    <text class="user-list-title">已存在的用户，点击切换</text>
+    <view class="user-list">
+      <view wx:for="{{existingUsers}}" wx:key="userId" class="user-chip" data-userid="{{item.userId}}" bindtap="onSelectExisting">
+        <text class="user-chip-avatar">{{item.avatar}}</text>
+        <text class="user-chip-name">{{item.name}}</text>
+        <text wx:if="{{item.isAdmin}}" class="user-chip-admin">管理员</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== 按钮 ===== -->
+  <button class="login-btn" disabled="{{!nickname}}" bindtap="onStart">
+    <text wx:if="{{isNewUser}}">✓ 开始记录</text>
+    <text wx:if="{{!isNewUser}}">切换到此用户</text>
+  </button>
+
+  <view class="login-footer">
+    <text>数据仅存储在本设备上</text>
+    <text>第一个用户自动成为管理员</text>
+  </view>
+</view>
