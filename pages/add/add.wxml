@@ -1,87 +1,113 @@
-<view class="container">
+<view class="page-container">
 
-  <!-- ===== 运动项目选择 ===== -->
-  <view class="card">
-    <view class="card-header">
-      <view class="card-header-icon">🏋️</view>
-      <text>选择运动项目</text>
-    </view>
-    <view class="sport-grid">
-      <view
-        wx:for="{{sportList}}"
-        wx:key="key"
-        class="sport-item {{selectedSport && selectedSport.key === item.key ? 'sport-selected' : ''}}"
-        data-key="{{item.key}}"
-        bindtap="onSelectSport"
-      >
-        <view class="sport-emoji">{{item.icon}}</view>
-        <view class="sport-name">{{item.shortName}}</view>
-        <view class="sport-badge">{{item.caloriePerKm > 0 ? '计时/距离' : item.measureType === 'duration' ? '计时' : item.measureType === 'count' ? '计次' : '计时+计次'}}</view>
-      </view>
-    </view>
-  </view>
-
-  <!-- ===== 运动详情 ===== -->
-  <view wx:if="{{selectedSport}}" class="card">
-    <view class="selected-header">
-      <view class="selected-icon-wrap">
-        <text class="selected-icon-text">{{selectedSport.icon}}</text>
-      </view>
-      <view class="selected-info">
-        <text class="selected-name">{{selectedSportShortName}}</text>
-        <text class="selected-badge badge badge-green">{{showLabel}}</text>
-      </view>
-    </view>
-
-    <view class="divider"></view>
-
-    <!-- 日期 -->
-    <view class="form-group">
-      <view class="form-label">运动日期</view>
-      <picker mode="date" value="{{date}}" bindchange="onDateChange">
-        <view class="form-input picker-value">{{date || '请选择日期'}}</view>
-      </picker>
-    </view>
-
-    <view class="form-row">
-      <!-- 时长 -->
-      <view wx:if="{{needDuration}}" class="form-group form-half">
-        <view class="form-label">时长 (分钟)</view>
-        <input class="form-input" type="digit" placeholder="如 30" value="{{duration}}" bindinput="onDurationInput" />
+  <!-- ===== 上半部分：可独立滚动的运动项目选择 ===== -->
+  <scroll-view
+    class="sports-scroll"
+    scroll-y
+    enhanced
+    show-scrollbar="{{false}}"
+    scroll-top="{{scrollTop}}"
+    scroll-with-animation="{{true}}"
+  >
+    <view class="card sports-card">
+      <view class="card-header">
+        <view class="card-header-icon">🏋️</view>
+        <text>选择运动项目</text>
+        <text class="card-header-hint">点击分类折叠</text>
       </view>
 
-      <!-- 距离 -->
-      <view wx:if="{{needDistance}}" class="form-group form-half">
-        <view class="form-label">距离 (公里)</view>
-        <input class="form-input" type="digit" placeholder="如 5.0" value="{{distance}}" bindinput="onDistanceInput" />
-      </view>
-
-      <!-- 次数 -->
-      <view wx:if="{{needCount}}" class="form-group form-half">
-        <view class="form-label">次数</view>
-        <input class="form-input" type="number" placeholder="如 500" value="{{count}}" bindinput="onCountInput" />
-      </view>
-    </view>
-
-    <!-- 热量预览 -->
-    <view wx:if="{{estimatedCalories > 0}}" class="calorie-preview">
-      <view class="preview-icon">🔥</view>
-      <view class="preview-content">
-        <view class="preview-label">预估消耗</view>
-        <view class="preview-value">
-          <text class="preview-number">{{estimatedCalories}}</text>
-          <text class="preview-unit">千卡</text>
+      <view wx:for="{{categories}}" wx:key="name" class="category-section">
+        <!-- 分类头部（可折叠） -->
+        <view class="category-header" data-index="{{index}}" bindtap="onToggleCategory">
+          <view class="category-header-left">
+            <text class="category-icon">{{item.icon}}</text>
+            <text class="category-name">{{item.name}}</text>
+            <text class="category-count">{{item.sports.length}}项</text>
+          </view>
+          <view class="category-arrow-wrap">
+            <text class="category-arrow {{item.collapsed ? '' : 'arrow-expanded'}}">▾</text>
+          </view>
         </view>
-        <view wx:if="{{calorieDetail}}" class="preview-formula">{{calorieDetail}}</view>
+
+        <!-- 分类下的运动网格（折叠时隐藏） -->
+        <view wx:if="{{!item.collapsed}}" class="sport-grid">
+          <view
+            wx:for="{{item.sports}}"
+            wx:for-item="sport"
+            wx:key="key"
+            class="sport-item {{selectedSport && selectedSport.key === sport.key ? 'sport-selected' : ''}}"
+            data-key="{{sport.key}}"
+            bindtap="onSelectSport"
+          >
+            <view class="sport-emoji">{{sport.icon}}</view>
+            <view class="sport-name">{{sport.shortName}}</view>
+            <view class="sport-badge">{{sport.caloriePerKm > 0 ? '计时/距离' : sport.measureType === 'duration' ? '计时' : sport.measureType === 'count' ? '计次' : '计时+计次'}}</view>
+          </view>
+        </view>
       </view>
     </view>
-  </view>
+  </scroll-view>
 
-  <!-- ===== 保存按钮 ===== -->
-  <view class="save-area">
+  <!-- ===== 下半部分：固定在底部的输入区域 ===== -->
+  <view class="bottom-area">
+    <!-- 已选运动指示条 -->
+    <view wx:if="{{selectedSport}}" class="selected-bar" bindtap="onScrollToSports">
+      <view class="selected-bar-left">
+        <text class="selected-bar-icon">{{selectedSport.icon}}</text>
+        <text class="selected-bar-name">{{selectedSportShortName}}</text>
+        <text class="selected-bar-badge badge badge-green">{{showLabel}}</text>
+      </view>
+      <text class="selected-bar-change">切换 ▸</text>
+    </view>
+    <view wx:else class="selected-bar selected-bar-empty">
+      <text class="selected-bar-hint">👆 请在上方选择运动项目</text>
+    </view>
+
+    <!-- 输入表单（选中运动后显示） -->
+    <view wx:if="{{selectedSport}}" class="form-area">
+      <!-- 日期行 -->
+      <view class="form-group">
+        <view class="form-label">📅 运动日期</view>
+        <picker mode="date" value="{{date}}" bindchange="onDateChange">
+          <view class="form-input picker-value">{{date || '请选择日期'}}</view>
+        </picker>
+      </view>
+
+      <!-- 运动量输入行 -->
+      <view class="form-row">
+        <view wx:if="{{needDuration}}" class="form-group form-half">
+          <view class="form-label">⏱️ 时长(分钟)</view>
+          <input class="form-input" type="digit" placeholder="如 30" value="{{duration}}" bindinput="onDurationInput" />
+        </view>
+
+        <view wx:if="{{needDistance}}" class="form-group form-half">
+          <view class="form-label">📏 距离(公里)</view>
+          <input class="form-input" type="digit" placeholder="如 5.0" value="{{distance}}" bindinput="onDistanceInput" />
+        </view>
+
+        <view wx:if="{{needCount}}" class="form-group form-half">
+          <view class="form-label">🔢 次数</view>
+          <input class="form-input" type="number" placeholder="如 500" value="{{count}}" bindinput="onCountInput" />
+        </view>
+      </view>
+
+      <!-- 热量预览 -->
+      <view wx:if="{{estimatedCalories > 0}}" class="calorie-preview">
+        <view class="preview-icon">🔥</view>
+        <view class="preview-content">
+          <view class="preview-value">
+            <text class="preview-number">{{estimatedCalories}}</text>
+            <text class="preview-unit">千卡</text>
+          </view>
+          <view wx:if="{{calorieDetail}}" class="preview-formula">{{calorieDetail}}</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 保存按钮 -->
     <button class="btn-primary save-btn" disabled="{{!canSave}}" bindtap="onSave">
-      <text wx:if="{{!canSave}}">填写运动量以保存</text>
-      <text wx:if="{{canSave}}">✓ 保存记录</text>
+      <text wx:if="{{!canSave}}">选择项目并填写运动量</text>
+      <text wx:if="{{canSave}}">✓ 保存记录{{estimatedCalories > 0 ? ' · ' + estimatedCalories + '千卡' : ''}}</text>
     </button>
   </view>
 </view>

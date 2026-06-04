@@ -1,9 +1,115 @@
+/* ==========================================
+   添加记录页 - 上下分栏布局
+   上半：可滚动的运动项目选择
+   下半：固定在底部的输入表单
+   ========================================== */
+
+/* ===== 页面容器：flex 上下分栏 ===== */
+.page-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ===== 上半：运动项目滚动区 ===== */
+.sports-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24rpx 32rpx 0;
+  box-sizing: border-box;
+}
+
+.sports-card {
+  margin-bottom: 16rpx;
+}
+
+.card-header-hint {
+  font-size: 22rpx;
+  color: var(--text-muted);
+  font-weight: 400;
+  margin-left: auto;
+}
+
+/* ===== 分类区块 ===== */
+.category-section {
+  margin-bottom: 8rpx;
+}
+
+.category-section:last-child {
+  margin-bottom: 0;
+}
+
+.category-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 16rpx;
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  border-radius: var(--radius-sm);
+  margin-bottom: 12rpx;
+  transition: background 0.2s;
+}
+
+.category-header:active {
+  background: #e2e8f0;
+}
+
+.category-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.category-icon {
+  font-size: 32rpx;
+}
+
+.category-name {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.category-count {
+  font-size: 22rpx;
+  color: var(--text-muted);
+  background: #e2e8f0;
+  padding: 2rpx 14rpx;
+  border-radius: 20rpx;
+}
+
+.category-arrow-wrap {
+  width: 44rpx;
+  height: 44rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.category-arrow {
+  font-size: 24rpx;
+  color: var(--text-muted);
+  transition: transform 0.25s ease;
+  display: inline-block;
+}
+
+.category-arrow.arrow-expanded {
+  transform: rotate(180deg);
+}
+
 /* ===== 运动项目网格 ===== */
 .sport-grid {
   display: flex;
   flex-wrap: wrap;
   gap: 16rpx;
-  margin-top: 8rpx;
+  padding: 4rpx 4rpx 8rpx;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-8rpx); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .sport-item {
@@ -56,48 +162,101 @@
   background: #ffffff;
 }
 
-/* ===== 已选运动头部 ===== */
-.selected-header {
-  display: flex;
-  align-items: center;
-  gap: 20rpx;
-}
+/* ==========================================
+   下半：底部固定输入区域
+   ========================================== */
 
-.selected-icon-wrap {
-  width: 80rpx;
-  height: 80rpx;
-  background: linear-gradient(135deg, #d1fae5, #a7f3d0);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.bottom-area {
   flex-shrink: 0;
+  background: #ffffff;
+  border-top: 2rpx solid var(--border);
+  box-shadow: 0 -4rpx 24rpx rgba(0, 0, 0, 0.06);
+  padding: 20rpx 32rpx 24rpx;
+  padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
+  max-height: 55vh;
+  overflow-y: auto;
+  box-sizing: border-box;
 }
 
-.selected-icon-text {
-  font-size: 40rpx;
+/* ===== 已选运动指示条 ===== */
+.selected-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16rpx 24rpx;
+  background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+  border-radius: var(--radius-sm);
+  margin-bottom: 16rpx;
 }
 
-.selected-info {
-  flex: 1;
+.selected-bar:active {
+  opacity: 0.8;
 }
 
-.selected-name {
-  display: block;
-  font-size: 32rpx;
+.selected-bar-empty {
+  background: #f8fafc;
+  justify-content: center;
+}
+
+.selected-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.selected-bar-icon {
+  font-size: 36rpx;
+}
+
+.selected-bar-name {
+  font-size: 28rpx;
   font-weight: 700;
   color: #1e293b;
-  margin-bottom: 4rpx;
 }
 
-.selected-badge {
-  display: inline-block;
+.selected-bar-badge {
+  font-size: 20rpx;
 }
 
-/* ===== 热量预览 ===== */
+.selected-bar-change {
+  font-size: 24rpx;
+  color: var(--primary-dark);
+  font-weight: 500;
+}
+
+.selected-bar-hint {
+  font-size: 26rpx;
+  color: var(--text-muted);
+}
+
+/* ===== 表单区域（紧凑化） ===== */
+.form-area {
+  margin-bottom: 8rpx;
+}
+
+.form-area .form-group {
+  margin-bottom: 20rpx;
+}
+
+.form-area .form-label {
+  font-size: 24rpx;
+  margin-bottom: 8rpx;
+}
+
+.form-area .form-input {
+  height: 80rpx;
+  font-size: 28rpx;
+}
+
+.form-area .picker-value {
+  height: 80rpx;
+}
+
+/* ===== 热量预览（紧凑化） ===== */
 .calorie-preview {
-  margin-top: 16rpx;
-  padding: 24rpx 28rpx;
+  margin-top: 8rpx;
+  margin-bottom: 12rpx;
+  padding: 18rpx 24rpx;
   background: linear-gradient(135deg, #fff7ed, #ffedd5);
   border-radius: 20rpx;
   display: flex;
@@ -106,7 +265,7 @@
 }
 
 .preview-icon {
-  font-size: 56rpx;
+  font-size: 48rpx;
   flex-shrink: 0;
 }
 
@@ -124,11 +283,11 @@
   display: flex;
   align-items: baseline;
   gap: 8rpx;
-  margin-bottom: 8rpx;
+  margin-bottom: 4rpx;
 }
 
 .preview-number {
-  font-size: 52rpx;
+  font-size: 44rpx;
   font-weight: 800;
   color: #ea580c;
   line-height: 1.1;
@@ -143,25 +302,21 @@
   font-size: 20rpx;
   color: #a16207;
   background: rgba(255, 255, 255, 0.6);
-  padding: 8rpx 16rpx;
+  padding: 6rpx 14rpx;
   border-radius: 12rpx;
   white-space: pre-line;
   line-height: 1.6;
   word-break: break-all;
 }
 
-/* ===== 保存区域 ===== */
-.save-area {
-  padding: 0 4rpx;
-}
-
+/* ===== 保存按钮 ===== */
 .save-btn {
   width: 100%;
-  margin-top: 32rpx;
-  height: 96rpx;
-  line-height: 96rpx;
-  font-size: 30rpx;
+  height: 88rpx;
+  line-height: 88rpx;
+  font-size: 28rpx;
   font-weight: 600;
   padding: 0;
   border-radius: 20rpx;
+  margin-top: 0;
 }

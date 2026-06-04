@@ -3,22 +3,79 @@ var sports = require('../../utils/sports');
 var calorie = require('../../utils/calorie');
 var storage = require('../../utils/storage');
 
+// 运动分类定义
+var SPORT_CATEGORIES = [
+  { name: '有氧运动', icon: '🏃', keys: ['walking', 'running', 'running_fast', 'swimming', 'cycling', 'hiking'] },
+  { name: '球类运动', icon: '🏀', keys: ['basketball', 'football', 'badminton', 'table_tennis', 'tennis'] },
+  { name: '力量训练', icon: '💪', keys: ['fitness', 'sit_up', 'push_up', 'plank', 'squat', 'pull_up', 'jump_rope'] },
+  { name: '柔韧放松', icon: '🧘', keys: ['yoga', 'dancing'] }
+];
+
+/**
+ * 将 flat sport list 按分类归类
+ * 返回 categories 数组，每项包含 name/icon/collapsed/sports
+ */
+function buildCategories(sportList) {
+  var usedKeys = {};
+  var categories = [];
+
+  for (var i = 0; i < SPORT_CATEGORIES.length; i++) {
+    var cat = SPORT_CATEGORIES[i];
+    var catSports = [];
+    for (var j = 0; j < cat.keys.length; j++) {
+      var key = cat.keys[j];
+      for (var k = 0; k < sportList.length; k++) {
+        if (sportList[k].key === key) {
+          catSports.push(sportList[k]);
+          usedKeys[key] = true;
+          break;
+        }
+      }
+    }
+    categories.push({
+      name: cat.name,
+      icon: cat.icon,
+      collapsed: false,
+      sports: catSports
+    });
+  }
+
+  // 收集未归类的运动（自定义运动）
+  var customSports = [];
+  for (var m = 0; m < sportList.length; m++) {
+    if (!usedKeys[sportList[m].key]) {
+      customSports.push(sportList[m]);
+    }
+  }
+  if (customSports.length > 0) {
+    categories.push({
+      name: '自定义',
+      icon: '⭐',
+      collapsed: false,
+      sports: customSports
+    });
+  }
+
+  return categories;
+}
+
 Page({
   data: {
-    sportList: [],
+    categories: [],
     selectedSport: null,
     selectedSportShortName: '',
     needDuration: false,
     needCount: false,
-    needDistance: false,    // 是否显示距离输入
+    needDistance: false,
     showLabel: '',
     date: '',
     duration: '',
     count: '',
-    distance: '',           // 距离(km)
+    distance: '',
     estimatedCalories: 0,
-    calorieDetail: '',      // 计算详情文字
-    canSave: false
+    calorieDetail: '',
+    canSave: false,
+    scrollTop: 0
   },
 
   onLoad: function() {
@@ -33,7 +90,8 @@ Page({
       return copy;
     });
 
-    this.setData({ sportList: sportList, date: today });
+    var categories = buildCategories(sportList);
+    this.setData({ categories: categories, date: today });
   },
 
   onShow: function() {
@@ -44,7 +102,28 @@ Page({
       copy.shortName = s.name.replace(/[^一-龥]/g, '');
       return copy;
     });
-    this.setData({ sportList: sportList });
+    var categories = buildCategories(sportList);
+    // 保持折叠状态
+    var oldCats = this.data.categories;
+    if (oldCats && oldCats.length > 0) {
+      for (var i = 0; i < categories.length; i++) {
+        for (var j = 0; j < oldCats.length; j++) {
+          if (categories[i].name === oldCats[j].name) {
+            categories[i].collapsed = oldCats[j].collapsed;
+            break;
+          }
+        }
+      }
+    }
+    this.setData({ categories: categories });
+  },
+
+  /** 切换分类折叠/展开 */
+  onToggleCategory: function(e) {
+    var index = e.currentTarget.dataset.index;
+    var categories = this.data.categories;
+    categories[index].collapsed = !categories[index].collapsed;
+    this.setData({ categories: categories });
   },
 
   onSelectSport: function(e) {
@@ -67,6 +146,11 @@ Page({
       calorieDetail: '',
       canSave: false
     });
+  },
+
+  /** 滚动到顶部查看运动项目 */
+  onScrollToSports: function() {
+    this.setData({ scrollTop: 0 });
   },
 
   onDateChange: function(e) {
