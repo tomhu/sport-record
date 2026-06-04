@@ -2,6 +2,7 @@
   "pages": [
     "pages/index/index",
     "pages/add/add",
+    "pages/history/history",
     "pages/settings/settings"
   ],
   "window": {
@@ -20,6 +21,10 @@
       {
         "pagePath": "pages/index/index",
         "text": "🏃 记录"
+      },
+      {
+        "pagePath": "pages/history/history",
+        "text": "📊 统计"
       },
       {
         "pagePath": "pages/settings/settings",
