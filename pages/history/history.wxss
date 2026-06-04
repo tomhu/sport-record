@@ -19,13 +19,13 @@
 .period-tab {
   flex: 1;
   text-align: center;
-  padding: 18rpx 0;
+  padding: 14rpx 0;
   background: #ffffff;
-  border-radius: 16rpx;
-  font-size: 26rpx;
+  border-radius: 12rpx;
+  font-size: 24rpx;
   font-weight: 500;
   color: #64748b;
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
   transition: all 0.2s;
 }
 
@@ -58,13 +58,13 @@
 
 .summary-emoji {
   display: block;
-  font-size: 40rpx;
-  margin-bottom: 8rpx;
+  font-size: 32rpx;
+  margin-bottom: 6rpx;
 }
 
 .summary-value {
   display: block;
-  font-size: 40rpx;
+  font-size: 36rpx;
   font-weight: 800;
   line-height: 1.2;
   margin-bottom: 4rpx;
@@ -111,13 +111,11 @@
 }
 
 .canvas-el {
-  width: 690rpx;
-  height: 360rpx;
+  display: block;
 }
 
 .canvas-el-bar {
-  width: 690rpx;
-  height: 400rpx;
+  display: block;
 }
 
 /* ===== 月度汇总 ===== */

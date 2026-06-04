@@ -170,28 +170,31 @@ Page({
     if (!this.data.hasData) return;
     var sysInfo = wx.getSystemInfoSync();
     var dpr = sysInfo.pixelRatio || 2;
-    var rpxRatio = sysInfo.windowWidth / 750;
+    var screenW = sysInfo.windowWidth;
+    // 可用宽度 = 屏幕宽 - 容器内边距(32rpx×2) - 卡片内边距(24rpx×2)
+    var rpxRatio = screenW / 750;
+    var availW = screenW - (32 + 24) * 2 * rpxRatio;
 
-    this._drawCanvas('lineChart', 690 * rpxRatio, 360 * rpxRatio, dpr, function (ctx, w, h) {
+    this._drawCanvas('lineChart', availW, 320 * rpxRatio, dpr, function (ctx, w, h) {
       chart.drawLineChart(ctx, w, h, this.data.lineData, {
         lineColor: '#10b981',
         yLabel: '千卡',
-        fill: true,
-        dpr: dpr
+        fill: true
       });
     });
 
-    this._drawCanvas('barChart', 690 * rpxRatio, 400 * rpxRatio, dpr, function (ctx, w, h) {
+    this._drawCanvas('barChart', availW, 360 * rpxRatio, dpr, function (ctx, w, h) {
       chart.drawBarChart(ctx, w, h, this.data.barData, {
         yLabel: '千卡',
-        showValue: true,
-        dpr: dpr
+        showValue: true
       });
     });
   },
 
   _drawCanvas: function (canvasId, cssW, cssH, dpr, drawFn) {
     var that = this;
+    cssW = Math.floor(cssW);
+    cssH = Math.floor(cssH);
     var query = wx.createSelectorQuery();
     query.select('#' + canvasId).node(function (res) {
       var canvas = res.node;
@@ -199,6 +202,8 @@ Page({
       var ctx = canvas.getContext('2d');
       canvas.width = Math.ceil(cssW * dpr);
       canvas.height = Math.ceil(cssH * dpr);
+      canvas.style.width = cssW + 'px';
+      canvas.style.height = cssH + 'px';
       ctx.scale(dpr, dpr);
       ctx.clearRect(0, 0, cssW, cssH);
       drawFn.call(that, ctx, cssW, cssH);
