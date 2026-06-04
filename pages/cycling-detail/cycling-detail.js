@@ -54,7 +54,7 @@ Page({
     // 地图折线
     var polyline = [{
       points: wps.map(function (w) { return { latitude: w.latitude, longitude: w.longitude }; }),
-      color: '#10b981CC',
+      color: '#10b981',
       width: 8,
       borderColor: '#059669',
       borderWidth: 2,

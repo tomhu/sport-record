@@ -108,7 +108,7 @@ Page({
         points: wps.map(function (w) {
           return { latitude: parseFloat(w.t), longitude: parseFloat(w.n) };
         }),
-        color: '#10b981DD',
+        color: '#10b981',
         width: 7,
         borderColor: '#059669',
         borderWidth: 2,
