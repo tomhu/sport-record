@@ -3,25 +3,16 @@ var chart = require('../../utils/chart');
 
 Page({
   data: {
-    // 周期选择
     period: 'week',
     periodList: [
       { key: 'week', label: '近7天' },
       { key: 'month', label: '近30天' },
       { key: 'all', label: '全部' }
     ],
-
-    // 汇总卡片
     summary: { records: 0, calories: 0, duration: 0, distance: 0 },
-
-    // 折线图数据
     lineData: [],
     barData: [],
-
-    // 月度汇总列表
     monthlySummaries: [],
-
-    // 状态
     hasData: false,
     loaded: false
   },
@@ -49,7 +40,6 @@ Page({
     var now = new Date();
     var todayStr = this._formatDate(now);
 
-    // 计算时间范围
     var startDate;
     if (period === 'week') {
       startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -60,7 +50,6 @@ Page({
     }
     var startStr = this._formatDate(startDate);
 
-    // 筛选
     var filtered = allRecords.filter(function (r) {
       return r.date >= startStr && r.date <= todayStr;
     });
@@ -70,7 +59,6 @@ Page({
       return;
     }
 
-    // 汇总
     var summary = this._calcSummary(filtered);
     var lineData = this._buildLineData(filtered, startStr, todayStr);
     var barData = this._buildBarData(filtered);
@@ -86,7 +74,7 @@ Page({
     }, function () {
       // 等待渲染完成后绘制图表
       var that = this;
-      setTimeout(function () { that.drawCharts(); }, 300);
+      setTimeout(function () { that.drawCharts(); }, 350);
     });
   },
 
@@ -105,14 +93,11 @@ Page({
   },
 
   _buildLineData: function (records, startStr, todayStr) {
-    // 按日期分组
     var map = {};
     for (var i = 0; i < records.length; i++) {
       var d = records[i].date;
       map[d] = (map[d] || 0) + (records[i].calories || 0);
     }
-
-    // 填充日期范围（确保无数据的天也显示）
     var result = [];
     var start = new Date(startStr);
     var end = new Date(todayStr);
@@ -131,14 +116,11 @@ Page({
       var key = records[i].sportName || '其他';
       map[key] = (map[key] || 0) + (records[i].calories || 0);
     }
-
     var list = [];
     for (var k in map) {
       if (map.hasOwnProperty(k)) list.push({ label: k, value: map[k] });
     }
     list.sort(function (a, b) { return b.value - a.value; });
-
-    // 取前 8 项
     var top = list.slice(0, 8);
     for (var j = 0; j < top.length; j++) {
       top[j].color = chart.COLORS[j % 12];
@@ -150,7 +132,7 @@ Page({
     var map = {};
     for (var i = 0; i < records.length; i++) {
       var d = records[i].date;
-      var monthKey = d.substring(0, 7); // "2026-06"
+      var monthKey = d.substring(0, 7);
       if (!map[monthKey]) map[monthKey] = { month: monthKey, records: 0, calories: 0, duration: 0 };
       map[monthKey].records++;
       map[monthKey].calories += records[i].calories || 0;
@@ -168,22 +150,14 @@ Page({
 
   drawCharts: function () {
     if (!this.data.hasData) return;
-    var sysInfo = wx.getSystemInfoSync();
-    var dpr = sysInfo.pixelRatio || 2;
-    var screenW = sysInfo.windowWidth;
-    // 可用宽度 = 屏幕宽 - 容器内边距(32rpx×2) - 卡片内边距(24rpx×2)
-    var rpxRatio = screenW / 750;
-    var availW = screenW - (32 + 24) * 2 * rpxRatio;
-
-    this._drawCanvas('lineChart', availW, 320 * rpxRatio, dpr, function (ctx, w, h) {
+    this._drawChart('lineChart', function (ctx, w, h) {
       chart.drawLineChart(ctx, w, h, this.data.lineData, {
         lineColor: '#10b981',
         yLabel: '千卡',
         fill: true
       });
     });
-
-    this._drawCanvas('barChart', availW, 360 * rpxRatio, dpr, function (ctx, w, h) {
+    this._drawChart('barChart', function (ctx, w, h) {
       chart.drawBarChart(ctx, w, h, this.data.barData, {
         yLabel: '千卡',
         showValue: true
@@ -191,22 +165,35 @@ Page({
     });
   },
 
-  _drawCanvas: function (canvasId, cssW, cssH, dpr, drawFn) {
+  /**
+   * 两步绘制：先获取 canvas 实际 CSS 尺寸，再设置内部分辨率并绘制
+   */
+  _drawChart: function (canvasId, drawFn) {
     var that = this;
-    cssW = Math.floor(cssW);
-    cssH = Math.floor(cssH);
     var query = wx.createSelectorQuery();
-    query.select('#' + canvasId).node(function (res) {
-      var canvas = res.node;
-      if (!canvas) return;
-      var ctx = canvas.getContext('2d');
-      canvas.width = Math.ceil(cssW * dpr);
-      canvas.height = Math.ceil(cssH * dpr);
-      canvas.style.width = cssW + 'px';
-      canvas.style.height = cssH + 'px';
-      ctx.scale(dpr, dpr);
-      ctx.clearRect(0, 0, cssW, cssH);
-      drawFn.call(that, ctx, cssW, cssH);
+    // Step 1: 获取 canvas 元素的实际渲染尺寸
+    query.select('#' + canvasId).boundingClientRect(function (rect) {
+      if (!rect) return;
+      var cssW = Math.floor(rect.width);
+      var cssH = Math.floor(rect.height);
+      if (cssW <= 0 || cssH <= 0) return;
+
+      // Step 2: 获取 canvas 节点
+      var nodeQuery = wx.createSelectorQuery();
+      nodeQuery.select('#' + canvasId).node(function (res) {
+        var canvas = res.node;
+        if (!canvas) return;
+        var dpr = wx.getSystemInfoSync().pixelRatio || 2;
+        var ctx = canvas.getContext('2d');
+
+        // 设置内部分辨率 = CSS 尺寸 × dpr
+        canvas.width = Math.ceil(cssW * dpr);
+        canvas.height = Math.ceil(cssH * dpr);
+        ctx.scale(dpr, dpr);
+        ctx.clearRect(0, 0, cssW, cssH);
+
+        drawFn.call(that, ctx, cssW, cssH);
+      }).exec();
     }).exec();
   },
 

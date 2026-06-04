@@ -112,10 +112,14 @@
 
 .canvas-el {
   display: block;
+  width: 620rpx;
+  height: 320rpx;
 }
 
 .canvas-el-bar {
   display: block;
+  width: 620rpx;
+  height: 360rpx;
 }
 
 /* ===== 月度汇总 ===== */
