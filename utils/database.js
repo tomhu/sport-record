@@ -297,7 +297,8 @@ function getCol(name) {
     remove: function (query) {
       var before = col.length;
       cache[name] = col.filter(function (d) { return !matchDoc(d, query); });
-      var count = before - cache[name].length;
+      col = cache[name]; // ← 同步闭包引用，否则后续 insert 会写入旧数组
+      var count = before - col.length;
       if (count > 0) saveCol(name);
       return count;
     },
