@@ -103,6 +103,12 @@
   text-align: center;
 }
 
+/* ===== 轨迹标识 ===== */
+.track-badge {
+  font-size: 20rpx;
+  margin-left: 6rpx;
+}
+
 /* 删除按钮 */
 .card-delete {
   position: absolute;

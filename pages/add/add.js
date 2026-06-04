@@ -129,6 +129,13 @@ Page({
   onSelectSport: function(e) {
     var key = e.currentTarget.dataset.key;
     var sport = sports.getSportByKey(key);
+
+    // 骑行运动 — 跳转到专用追踪页面
+    if (key === 'cycling') {
+      wx.navigateTo({ url: '/pages/cycling/cycling' });
+      return;
+    }
+
     var shortName = sport.name.replace(/[^一-龥]/g, '');
     var mt = sport.measureType || 'duration';
 

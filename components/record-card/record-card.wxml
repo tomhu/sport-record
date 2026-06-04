@@ -1,10 +1,11 @@
-<view class="record-card">
+<view class="record-card" data-id="{{record.id}}" bindtap="onTapCard">
   <view class="card-icon-wrap">
     <view class="card-icon">{{record.icon || '🏃'}}</view>
   </view>
   <view class="card-content">
     <view class="card-title-row">
       <text class="card-sport-name">{{record.sportName}}</text>
+      <text wx:if="{{record.hasTrack}}" class="track-badge">🗺️</text>
       <text class="card-date">{{record.date}}</text>
     </view>
     <view class="card-meta">
@@ -17,7 +18,7 @@
     <text class="calorie-val">{{record.calories}}</text>
     <text class="calorie-unit">千卡</text>
   </view>
-  <view class="card-delete" bindtap="onDelete">
+  <view class="card-delete" catchtap="onDelete">
     <text>×</text>
   </view>
 </view>

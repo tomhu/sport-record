@@ -1,0 +1,142 @@
+<view class="cycling-page">
+
+  <!-- ===== 全屏地图 ===== -->
+  <map
+    id="cyclingMap"
+    class="cycling-map"
+    latitude="{{centerLat}}"
+    longitude="{{centerLng}}"
+    scale="{{mapScale}}"
+    show-location="{{true}}"
+    enable-3D="{{true}}"
+    show-compass="{{true}}"
+  >
+    <!-- 轨迹折线 -->
+    <polyline
+      wx:if="{{polyline.length > 0}}"
+      points="{{polyline}}"
+      color="#10b981"
+      width="{{8}}"
+      borderColor="#059669"
+      borderWidth="{{2}}"
+      arrowLine="{{true}}"
+      dottedLine="{{false}}"
+    />
+  </map>
+
+  <!-- ===== 顶部状态栏 ===== -->
+  <view class="top-bar">
+    <view class="top-bar-bg"></view>
+    <view class="top-status" bindtap="onBack">
+      <text class="back-icon">←</text>
+      <text class="top-title">骑行记录</text>
+    </view>
+  </view>
+
+  <!-- ===== 实时数据面板 ===== -->
+  <view class="stats-panel">
+    <!-- 主数据行 -->
+    <view class="stats-main-row">
+      <view class="stats-main-item">
+        <text class="main-value">{{stats.durationStr || '00:00'}}</text>
+        <text class="main-label">时长</text>
+      </view>
+      <view class="stats-main-item stats-main-big">
+        <text class="main-value-big">{{stats.curSpeed || 0}}</text>
+        <text class="main-label">km/h</text>
+      </view>
+      <view class="stats-main-item">
+        <text class="main-value">{{stats.distKm || 0}}</text>
+        <text class="main-label">公里</text>
+      </view>
+    </view>
+
+    <!-- 副数据行 -->
+    <view class="stats-sub-row">
+      <view class="sub-item">
+        <text class="sub-icon">🏔</text>
+        <text class="sub-value">{{stats.elevGain || 0}}m</text>
+        <text class="sub-label">爬升</text>
+      </view>
+      <view class="sub-item">
+        <text class="sub-icon">⚡</text>
+        <text class="sub-value">{{stats.maxSpeed || 0}}</text>
+        <text class="sub-label">极速</text>
+      </view>
+      <view class="sub-item">
+        <text class="sub-icon">📊</text>
+        <text class="sub-value">{{stats.avgSpeed || 0}}</text>
+        <text class="sub-label">均速</text>
+      </view>
+      <view class="sub-item">
+        <text class="sub-icon">📍</text>
+        <text class="sub-value">{{stats.pointCount || 0}}</text>
+        <text class="sub-label">点</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== 控制按钮 ===== -->
+  <view class="ctrl-bar">
+    <!-- 未开始状态 -->
+    <view wx:if="{{!hasStarted || stats.state === 'idle'}}" class="ctrl-main">
+      <view class="btn-start-wrap" bindtap="onStart">
+        <text class="btn-start-icon">▶</text>
+        <text class="btn-start-text">开始骑行</text>
+      </view>
+    </view>
+
+    <!-- 追踪中 -->
+    <view wx:if="{{stats.state === 'tracking' || stats.state === 'paused'}}" class="ctrl-tracking">
+      <view class="btn-ctrl" bindtap="onStop">
+        <text class="btn-ctrl-icon">■</text>
+        <text class="btn-ctrl-text">结束</text>
+      </view>
+
+      <view wx:if="{{stats.state === 'tracking'}}" class="btn-pause-wrap" bindtap="onPause">
+        <text class="btn-pause-icon">⏸</text>
+      </view>
+      <view wx:if="{{stats.state === 'paused'}}" class="btn-resume-wrap" bindtap="onResume">
+        <text class="btn-resume-icon">▶</text>
+      </view>
+
+      <view class="btn-ctrl" bindtap="onCenter">
+        <text class="btn-ctrl-icon">⊙</text>
+        <text class="btn-ctrl-text">回中</text>
+      </view>
+    </view>
+
+    <!-- GPS 状态提示 -->
+    <view wx:if="{{gpsWeak}}" class="gps-warning">
+      <text>⚠ GPS信号弱，请移至开阔处</text>
+    </view>
+  </view>
+
+  <!-- ===== 结束确认弹窗 ===== -->
+  <view wx:if="{{showFinishModal}}" class="modal-mask"></view>
+  <view wx:if="{{showFinishModal}}" class="finish-modal">
+    <text class="finish-title">结束骑行？</text>
+    <view class="finish-stats">
+      <view class="finish-stat-row">
+        <text class="finish-stat-label">总距离</text>
+        <text class="finish-stat-value">{{finishPreview.dist}} km</text>
+      </view>
+      <view class="finish-stat-row">
+        <text class="finish-stat-label">运动时长</text>
+        <text class="finish-stat-value">{{finishPreview.time}}</text>
+      </view>
+      <view class="finish-stat-row">
+        <text class="finish-stat-label">平均速度</text>
+        <text class="finish-stat-value">{{finishPreview.avg}} km/h</text>
+      </view>
+      <view class="finish-stat-row">
+        <text class="finish-stat-label">极速</text>
+        <text class="finish-stat-value">{{finishPreview.max}} km/h</text>
+      </view>
+    </view>
+    <view class="finish-btns">
+      <button class="finish-btn-cancel" bindtap="onCancelFinish">继续骑行</button>
+      <button class="finish-btn-save" bindtap="onConfirmFinish">✓ 保存记录</button>
+    </view>
+  </view>
+</view>

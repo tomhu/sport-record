@@ -1,0 +1,118 @@
+<view class="detail-page">
+
+  <!-- ===== 空状态 ===== -->
+  <view wx:if="{{!hasTrack}}" class="empty-state">
+    <view class="empty-icon">🗺️</view>
+    <view class="empty-title">轨迹数据不可用</view>
+    <view class="empty-desc">这条记录可能没有轨迹信息</view>
+  </view>
+
+  <!-- ===== 地图 ===== -->
+  <view wx:if="{{hasTrack}}" class="map-section">
+    <map
+      id="detailMap"
+      class="detail-map"
+      latitude="{{centerLat}}"
+      longitude="{{centerLng}}"
+      scale="{{mapScale}}"
+      show-location="{{false}}"
+    >
+      <!-- 轨迹折线 -->
+      <polyline
+        points="{{polyline}}"
+        color="#10b981CC"
+        width="{{8}}"
+        borderColor="#059669"
+        borderWidth="{{2}}"
+        arrowLine="{{true}}"
+      />
+      <!-- 起点 -->
+      <marker
+        wx:if="{{startPoint}}"
+        id="0"
+        latitude="{{startPoint.latitude}}"
+        longitude="{{startPoint.longitude}}"
+        label="{ content:'起点', color:'#fff', bgColor:'#10b981', fontSize:12, borderRadius:8, padding:6 }"
+      />
+      <!-- 终点 -->
+      <marker
+        wx:if="{{endPoint}}"
+        id="1"
+        latitude="{{endPoint.latitude}}"
+        longitude="{{endPoint.longitude}}"
+        label="{ content:'终点', color:'#fff', bgColor:'#ef4444', fontSize:12, borderRadius:8, padding:6 }"
+      />
+    </map>
+
+    <!-- 地图操作按钮 -->
+    <view class="map-actions">
+      <view class="map-action-btn" bindtap="onFitRoute">
+        <text class="map-action-icon">⊞</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== 统计卡片 ===== -->
+  <view wx:if="{{hasTrack}}" class="detail-content">
+    <view class="summary-grid">
+      <view class="summary-item">
+        <text class="s-emoji">📏</text>
+        <text class="s-value">{{summary.distKm}}</text>
+        <text class="s-label">公里</text>
+      </view>
+      <view class="summary-item">
+        <text class="s-emoji">🕐</text>
+        <text class="s-value">{{summary.durationStr}}</text>
+        <text class="s-label">时长</text>
+      </view>
+      <view class="summary-item">
+        <text class="s-emoji">⚡</text>
+        <text class="s-value">{{summary.avgSpeed}}</text>
+        <text class="s-label">均速 km/h</text>
+      </view>
+      <view class="summary-item">
+        <text class="s-emoji">🚀</text>
+        <text class="s-value">{{summary.maxSpeed}}</text>
+        <text class="s-label">极速 km/h</text>
+      </view>
+    </view>
+
+    <!-- 速度曲线 -->
+    <view class="card chart-card" wx:if="{{speedData.length > 0}}">
+      <view class="chart-header">
+        <text class="chart-title">📈 速度曲线 (km/h)</text>
+      </view>
+      <view class="chart-wrap">
+        <canvas type="2d" id="speedChart" class="canvas-el"></canvas>
+      </view>
+    </view>
+
+    <!-- 海拔曲线 -->
+    <view class="card chart-card" wx:if="{{altData.length > 0 && hasAlt}}">
+      <view class="chart-header">
+        <text class="chart-title">🏔 海拔变化 (m)</text>
+      </view>
+      <view class="chart-wrap">
+        <canvas type="2d" id="altChart" class="canvas-el"></canvas>
+      </view>
+    </view>
+
+    <!-- 路径点统计 -->
+    <view class="card">
+      <view class="info-row">
+        <text class="info-label">路径点</text>
+        <text class="info-value">{{summary.pointCount}} 个</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">爬升</text>
+        <text class="info-value">{{summary.elevGain}} m</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">记录日期</text>
+        <text class="info-value">{{summary.date}}</text>
+      </view>
+    </view>
+
+    <view style="height: 40rpx;"></view>
+  </view>
+</view>
