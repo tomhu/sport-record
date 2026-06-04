@@ -1,0 +1,167 @@
+/* ===== 运动项目网格 ===== */
+.sport-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+  margin-top: 8rpx;
+}
+
+.sport-item {
+  width: calc(33.33% - 12rpx);
+  padding: 24rpx 8rpx;
+  background: #f8fafc;
+  border-radius: 20rpx;
+  text-align: center;
+  border: 2rpx solid transparent;
+  transition: all 0.2s;
+  box-sizing: border-box;
+}
+
+.sport-item:active {
+  transform: scale(0.95);
+}
+
+.sport-selected {
+  background: #d1fae5;
+  border-color: #10b981;
+  box-shadow: 0 4rpx 16rpx rgba(16, 185, 129, 0.2);
+}
+
+.sport-emoji {
+  font-size: 48rpx;
+  margin-bottom: 8rpx;
+  display: block;
+}
+
+.sport-name {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 6rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sport-badge {
+  font-size: 18rpx;
+  color: #10b981;
+  background: #d1fae5;
+  padding: 2rpx 14rpx;
+  border-radius: 20rpx;
+  display: inline-block;
+}
+
+.sport-selected .sport-badge {
+  background: #ffffff;
+}
+
+/* ===== 已选运动头部 ===== */
+.selected-header {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.selected-icon-wrap {
+  width: 80rpx;
+  height: 80rpx;
+  background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.selected-icon-text {
+  font-size: 40rpx;
+}
+
+.selected-info {
+  flex: 1;
+}
+
+.selected-name {
+  display: block;
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 4rpx;
+}
+
+.selected-badge {
+  display: inline-block;
+}
+
+/* ===== 热量预览 ===== */
+.calorie-preview {
+  margin-top: 16rpx;
+  padding: 24rpx 28rpx;
+  background: linear-gradient(135deg, #fff7ed, #ffedd5);
+  border-radius: 20rpx;
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.preview-icon {
+  font-size: 56rpx;
+  flex-shrink: 0;
+}
+
+.preview-content {
+  flex: 1;
+}
+
+.preview-label {
+  font-size: 24rpx;
+  color: #9a3412;
+  margin-bottom: 4rpx;
+}
+
+.preview-value {
+  display: flex;
+  align-items: baseline;
+  gap: 8rpx;
+  margin-bottom: 8rpx;
+}
+
+.preview-number {
+  font-size: 52rpx;
+  font-weight: 800;
+  color: #ea580c;
+  line-height: 1.1;
+}
+
+.preview-unit {
+  font-size: 24rpx;
+  color: #c2410c;
+}
+
+.preview-formula {
+  font-size: 20rpx;
+  color: #a16207;
+  background: rgba(255, 255, 255, 0.6);
+  padding: 8rpx 16rpx;
+  border-radius: 12rpx;
+  white-space: pre-line;
+  line-height: 1.6;
+  word-break: break-all;
+}
+
+/* ===== 保存区域 ===== */
+.save-area {
+  padding: 0 4rpx;
+}
+
+.save-btn {
+  width: 100%;
+  margin-top: 32rpx;
+  height: 96rpx;
+  line-height: 96rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+  padding: 0;
+  border-radius: 20rpx;
+}

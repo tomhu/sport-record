@@ -1,0 +1,23 @@
+<view class="record-card">
+  <view class="card-icon-wrap">
+    <view class="card-icon">{{record.icon || '🏃'}}</view>
+  </view>
+  <view class="card-content">
+    <view class="card-title-row">
+      <text class="card-sport-name">{{record.sportName}}</text>
+      <text class="card-date">{{record.date}}</text>
+    </view>
+    <view class="card-meta">
+      <text wx:if="{{record.duration > 0}}" class="meta-tag">🕐 {{record.duration}}分钟</text>
+      <text wx:if="{{record.distance > 0}}" class="meta-tag">📏 {{record.distance}}km</text>
+      <text wx:if="{{record.count > 0}}" class="meta-tag">🔢 {{record.count}}次</text>
+    </view>
+  </view>
+  <view class="card-calorie">
+    <text class="calorie-val">{{record.calories}}</text>
+    <text class="calorie-unit">千卡</text>
+  </view>
+  <view class="card-delete" bindtap="onDelete">
+    <text>×</text>
+  </view>
+</view>

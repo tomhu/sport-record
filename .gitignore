@@ -1,0 +1,16 @@
+# Windows
+Thumbs.db
+Desktop.ini
+
+# WeChat DevTools
+.project.private.config.json
+
+# Node / NPM
+node_modules/
+npm-debug.log*
+
+# Editor
+.idea/
+.vscode/
+*.swp
+*.swo

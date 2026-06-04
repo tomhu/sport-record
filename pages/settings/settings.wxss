@@ -1,0 +1,162 @@
+/* ===== 体重 ===== */
+.weight-desc {
+  font-size: 24rpx;
+  color: #94a3b8;
+  margin-bottom: 20rpx;
+  line-height: 1.5;
+}
+
+.weight-input-row {
+  display: flex;
+  gap: 16rpx;
+  align-items: center;
+}
+
+.weight-input-wrap {
+  flex: 1;
+  position: relative;
+}
+
+.weight-input {
+  padding-right: 80rpx;
+}
+
+.weight-unit {
+  position: absolute;
+  right: 28rpx;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 26rpx;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.weight-save-btn {
+  flex-shrink: 0;
+}
+
+/* ===== 运动编辑列表 ===== */
+.sport-list {
+  margin-top: 4rpx;
+}
+
+.sport-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 8rpx;
+  border-bottom: 2rpx solid #f1f5f9;
+}
+
+.sport-list-item:last-child {
+  border-bottom: none;
+}
+
+.sport-list-info {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  overflow: hidden;
+}
+
+.sport-list-icon {
+  font-size: 36rpx;
+  margin-right: 16rpx;
+  flex-shrink: 0;
+  width: 56rpx;
+  height: 56rpx;
+  background: #f1f5f9;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sport-list-detail {
+  overflow: hidden;
+}
+
+.sport-list-name {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #1e293b;
+  display: block;
+  margin-bottom: 2rpx;
+}
+
+.sport-list-meta {
+  font-size: 22rpx;
+  color: #94a3b8;
+  display: block;
+}
+
+.sport-list-actions {
+  display: flex;
+  gap: 12rpx;
+  flex-shrink: 0;
+}
+
+.action-edit {
+  font-size: 24rpx;
+  color: #10b981;
+  padding: 8rpx 20rpx;
+  background: #d1fae5;
+  border-radius: 20rpx;
+  font-weight: 500;
+}
+
+.action-edit:active {
+  background: #a7f3d0;
+}
+
+.action-del {
+  font-size: 24rpx;
+  color: #ef4444;
+  padding: 8rpx 20rpx;
+  background: #fef2f2;
+  border-radius: 20rpx;
+  font-weight: 500;
+}
+
+.action-del:active {
+  background: #fecaca;
+}
+
+/* ===== 关于 ===== */
+.about-card {
+  text-align: center;
+  padding: 40rpx 32rpx;
+}
+
+.about-icon {
+  font-size: 72rpx;
+  margin-bottom: 16rpx;
+}
+
+.about-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 16rpx;
+}
+
+.about-desc {
+  font-size: 24rpx;
+  color: #94a3b8;
+  line-height: 1.8;
+  text-align: center;
+  margin-bottom: 20rpx;
+}
+
+.about-formula {
+  font-size: 24rpx;
+  color: #94a3b8;
+  line-height: 1.8;
+  text-align: center;
+}
+
+.about-version {
+  font-size: 22rpx;
+  color: #cbd5e1;
+  margin-top: 20rpx;
+}

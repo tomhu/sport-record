@@ -1,0 +1,76 @@
+<view class="container">
+
+  <!-- ===== 空状态 ===== -->
+  <view wx:if="{{isEmpty}}" class="empty-state">
+    <view class="empty-icon">🏃‍♂️</view>
+    <view class="empty-title">还没有运动记录</view>
+    <view class="empty-desc">点击下方按钮开始记录你的运动吧</view>
+  </view>
+
+  <!-- ===== 今日统计 ===== -->
+  <view wx:if="{{!isEmpty}}" class="stats-card">
+    <view class="stats-bg-pattern"></view>
+    <view class="stats-header">
+      <text class="stats-title">今日运动</text>
+      <text class="stats-date">{{todayDate}}</text>
+    </view>
+    <view class="stats-grid">
+      <view class="stats-item">
+        <text class="stats-emoji">🏋️</text>
+        <text class="stats-value">{{todayStats.count}}</text>
+        <text class="stats-label">运动次数</text>
+      </view>
+      <view class="stats-item">
+        <text class="stats-emoji">🕐</text>
+        <text class="stats-value">{{todayStats.duration || 0}}</text>
+        <text class="stats-label">运动分钟</text>
+      </view>
+      <view class="stats-item">
+        <text class="stats-emoji">📏</text>
+        <text class="stats-value">{{todayStats.distance || 0}}</text>
+        <text class="stats-label">公里</text>
+      </view>
+      <view class="stats-item">
+        <text class="stats-emoji">🔥</text>
+        <text class="stats-value stats-highlight">{{todayStats.calories || 0}}</text>
+        <text class="stats-label">消耗千卡</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== 今日记录 ===== -->
+  <view wx:if="{{todayRecords.length > 0}}" class="section">
+    <view class="section-header">
+      <text class="section-title">今天</text>
+      <text class="section-count">{{todayRecords.length}} 项</text>
+    </view>
+    <record-card wx:for="{{todayRecords}}" wx:key="id" record="{{item}}" bind:delete="onDeleteRecord" />
+  </view>
+
+  <!-- ===== 历史记录 ===== -->
+  <view wx:if="{{groupedHistory.length > 0}}" class="section">
+    <view class="section-header">
+      <text class="section-title">历史记录</text>
+    </view>
+    <view wx:for="{{groupedHistory}}" wx:key="date" class="date-group">
+      <view class="date-group-header">
+        <view class="date-label-wrap">
+          <text class="date-label-date">{{item.date}}</text>
+          <text class="date-label-day">{{getDayOfWeek(item.date)}}</text>
+        </view>
+        <view class="date-summary-tags">
+          <text class="summary-tag">{{item.records.length}}次</text>
+          <text wx:if="{{item.totalDuration > 0}}" class="summary-tag">{{item.totalDuration}}分钟</text>
+          <text class="summary-tag summary-tag-highlight">{{item.totalCalories}}千卡</text>
+        </view>
+      </view>
+      <record-card wx:for="{{item.records}}" wx:key="id" wx:for-item="record" record="{{record}}" bind:delete="onDeleteRecord" />
+    </view>
+  </view>
+
+  <view style="height: 180rpx;"></view>
+</view>
+
+<view class="fab" bindtap="onAdd">
+  <text class="fab-text">+</text>
+</view>

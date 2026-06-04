@@ -1,0 +1,165 @@
+/* ===== 今日统计卡片 ===== */
+.stats-card {
+  background: linear-gradient(135deg, #10b981, #0ea5e9);
+  border-radius: 28rpx;
+  padding: 32rpx 32rpx 28rpx;
+  margin-bottom: 28rpx;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8rpx 32rpx rgba(16, 185, 129, 0.3);
+  color: #ffffff;
+}
+
+.stats-bg-pattern {
+  position: absolute;
+  top: -60rpx;
+  right: -60rpx;
+  width: 300rpx;
+  height: 300rpx;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+}
+
+.stats-bg-pattern::after {
+  content: '';
+  position: absolute;
+  bottom: -80rpx;
+  left: -40rpx;
+  width: 240rpx;
+  height: 240rpx;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
+}
+
+.stats-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28rpx;
+  position: relative;
+  z-index: 1;
+}
+
+.stats-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  opacity: 0.95;
+}
+
+.stats-date {
+  font-size: 24rpx;
+  opacity: 0.75;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8rpx 0;
+  position: relative;
+  z-index: 1;
+}
+
+.stats-item {
+  text-align: center;
+  padding: 8rpx 0;
+}
+
+.stats-emoji {
+  display: block;
+  font-size: 32rpx;
+  margin-bottom: 4rpx;
+}
+
+.stats-value {
+  display: block;
+  font-size: 44rpx;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 2rpx;
+}
+
+.stats-highlight {
+  color: #fde68a;
+}
+
+.stats-label {
+  display: block;
+  font-size: 22rpx;
+  opacity: 0.8;
+}
+
+/* ===== 分区 ===== */
+.section {
+  margin-bottom: 20rpx;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4rpx 16rpx 4rpx;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.section-count {
+  font-size: 24rpx;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+/* ===== 日期分组 ===== */
+.date-group {
+  margin-bottom: 12rpx;
+}
+
+.date-group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 8rpx 16rpx;
+  margin-bottom: 4rpx;
+}
+
+.date-label-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 12rpx;
+}
+
+.date-label-date {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #334155;
+}
+
+.date-label-day {
+  font-size: 24rpx;
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+.date-summary-tags {
+  display: flex;
+  gap: 12rpx;
+  align-items: center;
+}
+
+.summary-tag {
+  font-size: 22rpx;
+  color: #64748b;
+  background: #f1f5f9;
+  padding: 4rpx 16rpx;
+  border-radius: 20rpx;
+  line-height: 1.6;
+}
+
+.summary-tag-highlight {
+  color: #10b981;
+  background: #d1fae5;
+  font-weight: 600;
+}

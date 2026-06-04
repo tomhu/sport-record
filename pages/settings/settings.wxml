@@ -1,0 +1,139 @@
+<view class="container">
+
+  <!-- ===== 体重设置 ===== -->
+  <view class="card">
+    <view class="card-header">
+      <view class="card-header-icon">⚖️</view>
+      <text>体重设置</text>
+    </view>
+    <view class="weight-desc">用于计算运动消耗热量</view>
+    <view class="weight-input-row">
+      <view class="weight-input-wrap">
+        <input class="form-input weight-input" type="digit" placeholder="输入体重" value="{{weight}}" bindinput="onWeightInput" />
+        <text class="weight-unit">kg</text>
+      </view>
+      <button class="btn-primary btn-sm weight-save-btn" bindtap="onSaveWeight">保存</button>
+    </view>
+  </view>
+
+  <!-- ===== 运动类型管理 ===== -->
+  <view class="card">
+    <view class="card-header">
+      <view class="card-header-icon">📋</view>
+      <text>运动类型管理</text>
+    </view>
+    <view class="section-tip">点击「编辑」可修改 MET 值、计量方式等参数</view>
+
+    <view class="sport-list">
+      <view wx:for="{{allSports}}" wx:key="key" class="sport-list-item">
+        <view class="sport-list-info">
+          <text class="sport-list-icon">{{item.icon}}</text>
+          <view class="sport-list-detail">
+            <text class="sport-list-name">{{item.shortName}}</text>
+            <text class="sport-list-meta">
+              MET {{item.met}}
+              <text wx:if="{{item.isCustom}}"> · 自定义</text>
+              <text wx:if="{{item.isEdited && !item.isCustom}}"> · 已修改</text>
+            </text>
+          </view>
+        </view>
+        <view class="sport-list-actions">
+          <text wx:if="{{item.isCustom}}" class="action-del" data-key="{{item.key}}" bindtap="onDeleteCustom">删除</text>
+          <text class="action-edit" data-key="{{item.key}}" bindtap="onEditSport">编辑</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== 添加自定义运动 ===== -->
+  <view class="card">
+    <view class="card-header">
+      <view class="card-header-icon">✨</view>
+      <text>添加自定义运动</text>
+    </view>
+
+    <view class="form-group">
+      <view class="form-label-sm">运动名称</view>
+      <input class="form-input" placeholder="如：平板支撑" value="{{customName}}" bindinput="onCustomNameInput" />
+    </view>
+    <view class="form-group">
+      <view class="form-label-sm">Emoji 图标</view>
+      <input class="form-input" placeholder="如：🧘" value="{{customIcon}}" bindinput="onCustomIconInput" maxlength="4" />
+    </view>
+    <view class="form-row">
+      <view class="form-group form-half">
+        <view class="form-label-sm">MET 值</view>
+        <input class="form-input" type="digit" placeholder="如：3.0" value="{{customMet}}" bindinput="onCustomMetInput" />
+      </view>
+      <view class="form-group form-half">
+        <view class="form-label-sm">计量方式</view>
+        <picker mode="selector" range="{{['计时','计次','两者']}}" value="{{customMeasureType === 'duration' ? 0 : customMeasureType === 'count' ? 1 : 2}}" bindchange="onMeasureTypeChange">
+          <view class="form-input picker-value">{{customMeasureType === 'duration' ? '计时' : customMeasureType === 'count' ? '计次' : '两者'}}</view>
+        </picker>
+      </view>
+    </view>
+    <view wx:if="{{customMeasureType === 'count' || customMeasureType === 'both'}}" class="form-group">
+      <view class="form-label-sm">单次消耗 (千卡)</view>
+      <input class="form-input" type="digit" placeholder="如：0.5" value="{{customKcalPerUnit}}" bindinput="onCustomKcalInput" />
+    </view>
+    <button class="btn-outline" bindtap="onAddCustomSport">+ 添加运动</button>
+  </view>
+
+  <!-- ===== 数据管理 ===== -->
+  <view class="card">
+    <view class="card-header">
+      <view class="card-header-icon">🗄️</view>
+      <text>数据管理</text>
+    </view>
+    <view class="data-info">
+      当前共有 <text class="data-count">{{totalRecords}}</text> 条运动记录
+    </view>
+    <button class="btn-danger" bindtap="onClearRecords">清除所有记录</button>
+  </view>
+
+  <!-- ===== 关于 ===== -->
+  <view class="card about-card">
+    <view class="about-icon">🏃‍♂️</view>
+    <view class="about-title">运动记录</view>
+    <view class="about-formula">计时 · MET × 体重(kg) × 时长(h)</view>
+    <view class="about-formula">距离 · 距离(km) × 体重(kg) × 每km消耗</view>
+    <view class="about-formula">计次 · 次数 × 单次消耗(千卡)</view>
+    <view class="about-version">v4.0.0 · 本地数据库</view>
+  </view>
+
+  <view style="height: 40rpx;"></view>
+</view>
+
+<!-- ========== 编辑弹窗 ========== -->
+<view wx:if="{{showEditModal}}" class="modal-mask" bindtap="onCloseEdit"></view>
+<view wx:if="{{showEditModal}}" class="modal-panel">
+  <view class="modal-title">编辑「{{editSport.shortName}}」</view>
+
+  <view class="form-group">
+    <view class="form-label-sm">MET 值</view>
+    <input class="form-input" type="digit" value="{{editMet}}" bindinput="onEditMetInput" />
+  </view>
+
+  <view class="form-group">
+    <view class="form-label-sm">计量方式</view>
+    <picker mode="selector" range="{{['计时','计次','两者']}}" value="{{editMeasureType === 'duration' ? 0 : editMeasureType === 'count' ? 1 : 2}}" bindchange="onEditMeasureChange">
+      <view class="form-input picker-value">{{editMeasureType === 'duration' ? '计时' : editMeasureType === 'count' ? '计次' : '两者'}}</view>
+    </picker>
+  </view>
+
+  <view wx:if="{{editMeasureType === 'count' || editMeasureType === 'both'}}" class="form-group">
+    <view class="form-label-sm">单次消耗 (千卡)</view>
+    <input class="form-input" type="digit" value="{{editKcalPerUnit}}" bindinput="onEditKcalInput" />
+  </view>
+
+  <view class="form-group">
+    <view class="form-label-sm">每公里消耗 (kcal/kg/km, 0=不支持)</view>
+    <input class="form-input" type="digit" value="{{editCaloriePerKm}}" bindinput="onEditCalorieKmInput" />
+  </view>
+
+  <view class="modal-btns">
+    <button class="btn-outline" bindtap="onResetSportEdit">恢复默认</button>
+    <button class="btn-primary" bindtap="onSaveSportEdit">保存修改</button>
+  </view>
+  <view class="modal-close" bindtap="onCloseEdit">取消</view>
+</view>
