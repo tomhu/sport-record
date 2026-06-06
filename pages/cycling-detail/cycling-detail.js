@@ -25,7 +25,11 @@ Page({
     // 图表
     speedData: [],
     altData: [],
-    hasAlt: false
+    hasAlt: false,
+    // 心率
+    hrData: [],
+    hasHR: false,
+    hrStats: { avgBpm: 0, maxBpm: 0, minBpm: 0 }
   },
 
   onLoad: function (options) {
@@ -91,6 +95,14 @@ Page({
       if (wps[i].altitude > 0) { hasAlt = true; break; }
     }
 
+    // 心率数据
+    var hrData = this._buildHRData(wps);
+    var hasHR = false;
+    for (var j = 0; j < wps.length; j++) {
+      if (wps[j].heartRate > 0) { hasHR = true; break; }
+    }
+    var hrStats = stats.heartRate || { avgBpm: 0, maxBpm: 0, minBpm: 0 };
+
     this.setData({
       hasTrack: true,
       centerLat: centerLat,
@@ -109,7 +121,10 @@ Page({
       },
       speedData: speedData,
       altData: altData,
-      hasAlt: hasAlt
+      hasAlt: hasAlt,
+      hrData: hrData,
+      hasHR: hasHR,
+      hrStats: hrStats
     }, function () {
       var that = this;
       setTimeout(function () { that._drawCharts(); }, 400);
@@ -142,6 +157,19 @@ Page({
     return result;
   },
 
+  _buildHRData: function (wps) {
+    if (wps.length < 2) return [];
+    var step = Math.max(1, Math.floor(wps.length / 80));
+    var result = [];
+    for (var i = 0; i < wps.length; i += step) {
+      var hr = wps[i].heartRate || 0;
+      if (hr > 0) {
+        result.push({ label: String(i), value: hr });
+      }
+    }
+    return result;
+  },
+
   // ====== 图表绘制 ======
 
   _drawCharts: function () {
@@ -160,6 +188,16 @@ Page({
         chart.drawLineChart(ctx, w, h, this.data.altData, {
           lineColor: '#8b5cf6',
           yLabel: 'm',
+          fill: true
+        });
+      });
+    }
+
+    if (this.data.hrData.length > 0 && this.data.hasHR) {
+      this._drawCanvas('hrChart', function (ctx, w, h) {
+        chart.drawLineChart(ctx, w, h, this.data.hrData, {
+          lineColor: '#ef4444',
+          yLabel: 'bpm',
           fill: true
         });
       });

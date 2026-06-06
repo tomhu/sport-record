@@ -9,22 +9,23 @@ var db = require('./database');
 
 /**
  * 编码路径点数组 → 紧凑字符串
- * 格式: "lat,lng,alt,segDist;lat,lng,alt,segDist;..."
+ * 格式: "lat,lng,alt,segDist,hr;lat,lng,alt,segDist,hr;..."
  *
- * 路径点来自 tracker.js，字段为 { t, n, a, d }
+ * 路径点来自 tracker.js，字段为 { t, n, a, d, h }
+ * h 为心率数据 (bpm)，旧数据无此字段时默认 0
  */
 function encodeWaypoints(wps) {
   if (!wps || wps.length === 0) return '';
   var parts = [];
   for (var i = 0; i < wps.length; i++) {
     var w = wps[i];
-    parts.push(w.t + ',' + w.n + ',' + (w.a || 0) + ',' + (w.d || 0));
+    parts.push(w.t + ',' + w.n + ',' + (w.a || 0) + ',' + (w.d || 0) + ',' + (w.h || 0));
   }
   return parts.join(';');
 }
 
 /**
- * 解码字符串 → 路径点数组 [{ latitude, longitude, altitude, segDist }]
+ * 解码字符串 → 路径点数组 [{ latitude, longitude, altitude, segDist, heartRate }]
  */
 function decodeWaypoints(s) {
   if (!s) return [];
@@ -37,7 +38,8 @@ function decodeWaypoints(s) {
         latitude: parseFloat(p[0]),
         longitude: parseFloat(p[1]),
         altitude: parseInt(p[2]) || 0,
-        segDist: parseFloat(p[3]) || 0
+        segDist: parseFloat(p[3]) || 0,
+        heartRate: parseInt(p[4]) || 0
       });
     }
   }

@@ -81,6 +81,68 @@
     </view>
   </view>
 
+  <!-- ===== 蓝牙心率设备 ===== -->
+  <view class="card">
+    <view class="card-header">
+      <view class="card-header-icon">⌚</view>
+      <text>蓝牙心率设备</text>
+    </view>
+    <view class="section-tip">连接支持标准心率服务(0x180D)的BLE设备，骑行时获取实时心率</view>
+
+    <!-- 已配对设备 -->
+    <view wx:if="{{bleDevice}}" class="ble-paired">
+      <view class="ble-paired-info">
+        <text class="ble-paired-icon">⌚</text>
+        <view class="ble-paired-detail">
+          <text class="ble-paired-name">{{bleDevice.name || '未知设备'}}</text>
+          <text class="ble-paired-id">{{bleDevice.deviceId}}</text>
+        </view>
+        <view class="ble-paired-status">
+          <view class="ble-status-dot ble-status-dot-green"></view>
+          <text class="ble-status-text">已配对</text>
+        </view>
+      </view>
+      <button class="btn-outline btn-sm ble-unpair-btn" bindtap="onBLEDisconnect">取消配对</button>
+    </view>
+
+    <!-- 未配对：扫描按钮 -->
+    <view wx:if="{{!bleDevice}}" class="ble-scan-area">
+      <button
+        class="btn-outline ble-scan-btn"
+        disabled="{{bleScanning || bleConnecting}}"
+        bindtap="{{bleScanning ? 'onBLEStopScan' : 'onBLEScan'}}"
+      >
+        <text wx:if="{{!bleScanning && !bleConnecting}}">🔍 扫描心率设备</text>
+        <text wx:if="{{bleScanning}}">⏳ 扫描中...点击停止</text>
+        <text wx:if="{{bleConnecting}}">⏳ 正在连接...</text>
+      </button>
+
+      <!-- 扫描结果列表 -->
+      <view wx:if="{{bleScanList.length > 0}}" class="ble-device-list">
+        <view class="ble-device-tip">发现 {{bleScanList.length}} 个设备，点击连接</view>
+        <view
+          wx:for="{{bleScanList}}"
+          wx:key="deviceId"
+          class="ble-device-item"
+          data-index="{{index}}"
+          bindtap="onBLESelect"
+        >
+          <view class="ble-device-left">
+            <text class="ble-device-icon">{{item.hasHRService ? '❤️' : '📱'}}</text>
+            <view class="ble-device-info">
+              <text class="ble-device-name">{{item.name}}</text>
+              <text class="ble-device-id">{{item.deviceId}}</text>
+            </view>
+          </view>
+          <view class="ble-device-right">
+            <text wx:if="{{item.hasHRService}}" class="ble-hr-badge badge badge-green">心率</text>
+            <text class="ble-rssi">{{item.RSSI > -60 ? '📶' : item.RSSI > -75 ? '📶' : '📡'}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
   <!-- ===== 运动类型管理 ===== -->
   <view class="card">
     <view class="card-header">

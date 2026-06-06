@@ -45,6 +45,9 @@
   "permission": {
     "scope.userLocation": {
       "desc": "骑行时需要获取你的位置信息来记录轨迹"
+    },
+    "scope.bluetooth": {
+      "desc": "连接蓝牙心率设备获取实时心率数据"
     }
   }
 }

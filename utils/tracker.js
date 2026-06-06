@@ -67,6 +67,8 @@ var Tracker = function () {
   this._timerId = 0;
   this._updateCb = null;     // 每次位置更新回调
   this._lastAlt = null;      // 上次海拔
+  this._currentHR = 0;       // 当前心率
+  this._hrHistory = [];      // 心率历史 [{bpm, ts}]
 };
 
 Tracker.prototype = {
@@ -91,6 +93,8 @@ Tracker.prototype = {
     this._lastPt = null;
     this._lastAlt = null;
     this._startTs = Date.now();
+    this._currentHR = 0;
+    this._hrHistory = [];
 
     // 先停止旧的定位
     wx.stopLocationUpdate({ complete: function () {} });
@@ -210,6 +214,24 @@ Tracker.prototype = {
     return this._waypoints;
   },
 
+  /**
+   * 设置当前心率（由外部 BLE 模块调用）
+   * @param {number} bpm
+   */
+  setHeartRate: function (bpm) {
+    if (!bpm || bpm <= 0 || bpm > 250) return;
+    this._currentHR = bpm;
+    this._hrHistory.push({ bpm: bpm, ts: Date.now() });
+  },
+
+  /**
+   * 获取心率历史记录
+   * @returns {Array} [{bpm, ts}]
+   */
+  getHRHistory: function () {
+    return this._hrHistory;
+  },
+
   // ========== 内部 ==========
 
   _onLocationChange: function (fn) {
@@ -279,7 +301,8 @@ Tracker.prototype = {
       n: lng.toFixed(6),
       a: Math.round(alt),
       d: Math.round(segDist * 10) / 10,
-      s: Math.round(Date.now() / 1000)
+      s: Math.round(Date.now() / 1000),
+      h: this._currentHR || 0   // 心率数据
     };
     this._waypoints.push(wp);
 

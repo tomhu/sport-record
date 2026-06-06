@@ -106,3 +106,14 @@
 
 .info-label { font-size: 26rpx; color: #64748b; }
 .info-value { font-size: 26rpx; font-weight: 600; color: #1e293b; }
+
+/* ===== 心率行 ===== */
+.info-row-hr {
+  background: #fef2f2;
+  border-radius: 12rpx;
+  margin: 8rpx 0;
+}
+
+.info-value-hr {
+  color: #ef4444 !important;
+}

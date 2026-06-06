@@ -97,6 +97,16 @@
       </view>
     </view>
 
+    <!-- 心率曲线 -->
+    <view class="card chart-card" wx:if="{{hrData.length > 0 && hasHR}}">
+      <view class="chart-header">
+        <text class="chart-title">❤️ 心率曲线 (bpm)</text>
+      </view>
+      <view class="chart-wrap">
+        <canvas type="2d" id="hrChart" class="canvas-el"></canvas>
+      </view>
+    </view>
+
     <!-- 路径点统计 -->
     <view class="card">
       <view class="info-row">
@@ -106,6 +116,18 @@
       <view class="info-row">
         <text class="info-label">爬升</text>
         <text class="info-value">{{summary.elevGain}} m</text>
+      </view>
+      <view wx:if="{{hasHR}}" class="info-row info-row-hr">
+        <text class="info-label">❤️ 平均心率</text>
+        <text class="info-value info-value-hr">{{hrStats.avgBpm}} bpm</text>
+      </view>
+      <view wx:if="{{hasHR}}" class="info-row">
+        <text class="info-label">❤️ 最高心率</text>
+        <text class="info-value">{{hrStats.maxBpm}} bpm</text>
+      </view>
+      <view wx:if="{{hasHR && hrStats.minBpm > 0}}" class="info-row">
+        <text class="info-label">❤️ 最低心率</text>
+        <text class="info-value">{{hrStats.minBpm}} bpm</text>
       </view>
       <view class="info-row">
         <text class="info-label">记录日期</text>

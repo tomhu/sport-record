@@ -169,6 +169,34 @@ function getWeight() {
   return settings.weight || 65;
 }
 
+// ========== 蓝牙设备 ==========
+
+function getBLEDevice() {
+  try {
+    var doc = db.getDoc('ble_device');
+    return doc || null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function saveBLEDevice(deviceInfo) {
+  try {
+    db.setDoc('ble_device', deviceInfo);
+  } catch (e) {
+    console.error('保存蓝牙设备失败:', e);
+  }
+}
+
+function removeBLEDevice() {
+  try {
+    var col = db.collection('ble_device');
+    col.remove({});
+  } catch (e) {
+    console.error('删除蓝牙设备失败:', e);
+  }
+}
+
 module.exports = {
   generateId: generateId,
   // 用户
@@ -191,5 +219,9 @@ module.exports = {
   // 设置
   getSettings: getSettings,
   saveSettings: saveSettings,
-  getWeight: getWeight
+  getWeight: getWeight,
+  // 蓝牙设备
+  getBLEDevice: getBLEDevice,
+  saveBLEDevice: saveBLEDevice,
+  removeBLEDevice: removeBLEDevice
 };

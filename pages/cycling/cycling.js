@@ -2,6 +2,7 @@ var app = getApp();
 var Tracker = require('../../utils/tracker');
 var trackDb = require('../../utils/track-db');
 var storage = require('../../utils/storage');
+var bleHR = require('../../utils/ble-hr');
 
 Page({
   data: {
@@ -27,21 +28,37 @@ Page({
     hasStarted: false,
     gpsWeak: false,
     showFinishModal: false,
-    finishPreview: { dist: 0, time: '', avg: 0, max: 0 }
+    finishPreview: { dist: 0, time: '', avg: 0, max: 0 },
+    // 心率
+    heartRate: 0,
+    hrConnected: false,
+    hrConnecting: false,
+    hrDeviceName: '',
+    hrAvgBpm: 0,
+    hrMaxBpm: 0,
+    hrMinBpm: 999,
+    hrSampleCount: 0
   },
 
   _tracker: null,
   _startCenterSet: false,
+  _hrMonitor: null,
+  _hrSamples: [],
+  _hrSum: 0,
 
   onLoad: function () {
     if (!app.checkLogin()) return;
     this._tracker = Tracker.createTracker();
     this._initMapCenter();
+    this._initHRMonitor();
   },
 
   onUnload: function () {
     if (this._tracker) {
       this._tracker.stop();
+    }
+    if (this._hrMonitor) {
+      this._hrMonitor.disconnect();
     }
   },
 
@@ -77,6 +94,69 @@ Page({
         });
       }
     });
+  },
+
+  // ====== 心率初始化 ======
+  _initHRMonitor: function () {
+    var saved = storage.getBLEDevice();
+    if (!saved || !saved.deviceId) {
+      this.setData({ hrConnected: false, hrDeviceName: '' });
+      return;
+    }
+
+    this.setData({ hrConnecting: true, hrDeviceName: saved.name || '设备' });
+
+    var that = this;
+    this._hrMonitor = bleHR.createHRMonitor();
+    this._hrMonitor.onStateChange(function (state, msg) {
+      if (state === 'connected') {
+        that.setData({ hrConnected: true, hrConnecting: false });
+        console.log('[Cycling] 心率设备已连接');
+      } else if (state === 'disconnected') {
+        that.setData({ hrConnected: false, hrConnecting: false, heartRate: 0 });
+      } else if (state === 'error') {
+        that.setData({ hrConnected: false, hrConnecting: false, heartRate: 0 });
+        console.warn('[Cycling] 心率连接失败:', msg);
+      }
+    });
+
+    this._hrMonitor.connect(saved.deviceId, function (bpm) {
+      that._onHeartRate(bpm);
+    }, function (err) {
+      that.setData({ hrConnecting: false, hrConnected: false });
+      // 心率连接失败不影响骑行，仅提示
+      wx.showToast({ title: err || '心率连接失败', icon: 'none', duration: 2000 });
+    });
+  },
+
+  /**
+   * 心率数据回调
+   */
+  _onHeartRate: function (bpm) {
+    if (bpm <= 0 || bpm > 250) return; // 异常值过滤
+
+    this.setData({ heartRate: bpm });
+
+    // 统计
+    this._hrSamples.push(bpm);
+    this._hrSum += bpm;
+    var hrMaxBpm = this.data.hrMaxBpm;
+    var hrMinBpm = this.data.hrMinBpm;
+    if (bpm > hrMaxBpm) hrMaxBpm = bpm;
+    if (bpm < hrMinBpm) hrMinBpm = bpm;
+    var hrAvgBpm = Math.round(this._hrSum / this._hrSamples.length);
+
+    this.setData({
+      hrMaxBpm: hrMaxBpm,
+      hrMinBpm: hrMinBpm,
+      hrAvgBpm: hrAvgBpm,
+      hrSampleCount: this._hrSamples.length
+    });
+
+    // 传递给 tracker 记录
+    if (this._tracker && this._tracker.setHeartRate) {
+      this._tracker.setHeartRate(bpm);
+    }
   },
 
   // ====== 开始骑行 ======
@@ -223,6 +303,12 @@ Page({
     storage.addRecord(record);
 
     // 2. 保存轨迹
+    var hrStats = {
+      avgBpm: this.data.hrAvgBpm,
+      maxBpm: this.data.hrMaxBpm,
+      minBpm: this.data.hrMinBpm === 999 ? 0 : this.data.hrMinBpm,
+      sampleCount: this._hrSamples.length
+    };
     trackDb.saveTrack({
       recordId: record.id,
       userId: user ? user.userId : '',
@@ -234,9 +320,15 @@ Page({
         avgSpeed: summary.avgSpeed,
         maxSpeed: summary.maxSpeed,
         elevGain: summary.elevGain,
-        pointCount: summary.pointCount
+        pointCount: summary.pointCount,
+        heartRate: hrStats
       }
     });
+
+    // 3. 断开心率设备
+    if (this._hrMonitor) {
+      this._hrMonitor.disconnect();
+    }
 
     this.setData({ showFinishModal: false });
     wx.showToast({ title: '骑行记录已保存！', icon: 'success', duration: 2000 });
@@ -249,10 +341,18 @@ Page({
 
   _discardRide: function () {
     this._tracker = Tracker.createTracker();
+    // 重置心率统计
+    this._hrSamples = [];
+    this._hrSum = 0;
     this.setData({
       hasStarted: false,
       stats: { state: 'idle', distKm: 0, durationStr: '00:00', curSpeed: 0, avgSpeed: 0, maxSpeed: 0, elevGain: 0, pointCount: 0 },
-      polyline: []
+      polyline: [],
+      heartRate: 0,
+      hrAvgBpm: 0,
+      hrMaxBpm: 0,
+      hrMinBpm: 999,
+      hrSampleCount: 0
     });
   },
 

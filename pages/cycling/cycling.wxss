@@ -9,74 +9,80 @@
 
 /* ===== 全屏地图 ===== */
 .cycling-map {
-  width: 100%;
-  height: 100%;
-}
-
-/* ===== 顶部状态栏 ===== */
-.top-bar {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 10;
-  padding-top: env(safe-area-inset-top);
-}
-
-.top-bar-bg {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(180deg, rgba(0,0,0,0.4), transparent);
+  width: 100%;
+  height: 100%;
 }
 
-.top-status {
-  position: relative;
+/* ===== 顶部状态栏（隐藏，功能合并到码表面板） ===== */
+.top-bar {
+  display: none;
+}
+
+/* ===== 实时数据面板 - 码表风格 ===== */
+.stats-panel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 33.34vh;
+  min-height: 420rpx;
+  background: #0f172a;
+  z-index: 20;
+  padding-top: env(safe-area-inset-top);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8rpx 40rpx rgba(0,0,0,0.5);
+}
+
+/* 顶部标题行 */
+.stats-header-bar {
   display: flex;
   align-items: center;
-  padding: 24rpx 32rpx;
-  gap: 16rpx;
+  justify-content: space-between;
+  padding: 12rpx 32rpx 8rpx;
 }
 
-.back-icon {
-  font-size: 40rpx;
-  color: #fff;
-  font-weight: 300;
+.stats-header-back {
+  font-size: 36rpx;
+  color: #94a3b8;
   width: 56rpx;
   height: 56rpx;
   line-height: 56rpx;
   text-align: center;
-  background: rgba(0,0,0,0.3);
-  border-radius: 50%;
 }
 
-.top-title {
-  font-size: 30rpx;
-  font-weight: 600;
-  color: #fff;
+.stats-header-title {
+  font-size: 24rpx;
+  color: #64748b;
+  font-weight: 500;
+  letter-spacing: 2rpx;
 }
 
-/* ===== 实时数据面板 ===== */
-.stats-panel {
-  position: absolute;
-  top: 160rpx;
-  left: 32rpx;
-  right: 32rpx;
-  background: rgba(255,255,255,0.92);
-  backdrop-filter: blur(20rpx);
-  border-radius: 24rpx;
-  padding: 24rpx 28rpx;
-  z-index: 10;
-  box-shadow: 0 4rpx 24rpx rgba(0,0,0,0.12);
+.stats-header-status {
+  font-size: 22rpx;
+  color: #64748b;
 }
 
+.stats-header-status-active {
+  color: #10b981 !important;
+}
+
+.stats-header-status-paused {
+  color: #f59e0b !important;
+}
+
+/* 主数据区 */
 .stats-main-row {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
-  margin-bottom: 16rpx;
+  padding: 8rpx 40rpx 0;
+  flex: 1;
 }
 
 .stats-main-item {
@@ -85,60 +91,103 @@
 }
 
 .stats-main-big {
-  flex: 1.5;
+  flex: 1.6;
 }
 
 .main-value {
   display: block;
-  font-size: 44rpx;
+  font-size: 56rpx;
   font-weight: 800;
-  color: #1e293b;
-  line-height: 1.2;
+  color: #e2e8f0;
+  line-height: 1.15;
   font-variant-numeric: tabular-nums;
 }
 
 .main-value-big {
   display: block;
-  font-size: 64rpx;
+  font-size: 108rpx;
   font-weight: 900;
   color: #10b981;
-  line-height: 1.1;
+  line-height: 1;
   font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 40rpx rgba(16,185,129,0.35);
 }
 
 .main-label {
   display: block;
   font-size: 22rpx;
-  color: #94a3b8;
-  margin-top: 4rpx;
+  color: #64748b;
+  margin-top: 6rpx;
+  font-weight: 500;
+  letter-spacing: 1rpx;
 }
 
+/* 副数据区 */
 .stats-sub-row {
   display: flex;
   justify-content: space-around;
-  padding-top: 14rpx;
-  border-top: 1rpx solid rgba(0,0,0,0.06);
+  padding: 16rpx 24rpx 20rpx;
+  border-top: 1rpx solid rgba(255,255,255,0.08);
 }
 
 .sub-item {
   text-align: center;
+  min-width: 0;
+  flex: 1;
 }
 
 .sub-icon {
-  font-size: 24rpx;
+  font-size: 22rpx;
   margin-right: 2rpx;
 }
 
 .sub-value {
-  font-size: 24rpx;
+  font-size: 28rpx;
   font-weight: 700;
-  color: #334155;
+  color: #cbd5e1;
   margin: 0 4rpx;
+  font-variant-numeric: tabular-nums;
 }
 
 .sub-label {
-  font-size: 20rpx;
-  color: #94a3b8;
+  font-size: 18rpx;
+  color: #475569;
+  display: block;
+  margin-top: 2rpx;
+}
+
+/* ===== 心率样式 ===== */
+.sub-item-hr .sub-icon {
+  animation: hrPulse 1s ease-in-out infinite;
+}
+
+.sub-value-hr {
+  color: #ef4444 !important;
+  text-shadow: 0 0 16rpx rgba(239,68,68,0.4);
+}
+
+.sub-value-hr-off {
+  color: #334155 !important;
+}
+
+.sub-value-hr-connecting {
+  color: #f59e0b !important;
+  letter-spacing: 2rpx;
+}
+
+@keyframes hrPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+
+/* 结束弹窗心率行 */
+.finish-stat-hr {
+  background: #fef2f2;
+  border-radius: 12rpx;
+}
+
+.finish-stat-hr-val {
+  color: #ef4444 !important;
 }
 
 /* ===== 控制栏 ===== */

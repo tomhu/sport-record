@@ -1,6 +1,7 @@
 var app = getApp();
 var storage = require('../../utils/storage');
 var sportsData = require('../../utils/sports');
+var bleHR = require('../../utils/ble-hr');
 
 Page({
   data: {
@@ -24,7 +25,13 @@ Page({
     customIcon: '',
     customMet: '',
     customMeasureType: 'count',
-    customKcalPerUnit: ''
+    customKcalPerUnit: '',
+    // 蓝牙设备
+    bleDevice: null,
+    bleScanning: false,
+    bleScanList: [],
+    bleConnecting: false,
+    bleState: ''  // '' | 'scanning' | 'connecting' | 'connected' | 'error'
   },
 
   onShow: function () {
@@ -37,6 +44,7 @@ Page({
     var settings = storage.getSettings();
     var records = storage.getRecords(); // 获取全部记录以统计
     var customs = sportsData.getCustomSports();
+    var bleDevice = storage.getBLEDevice();
 
     var all = sportsData.getAllSports();
     var allSports = all.map(function (s) {
@@ -55,7 +63,8 @@ Page({
       allSports: allSports,
       customSports: customs,
       totalRecords: records.length,
-      allUsers: storage.getUsersWithStats()
+      allUsers: storage.getUsersWithStats(),
+      bleDevice: bleDevice
     });
 
     // 管理员视角：高亮当前选中的用户
@@ -218,6 +227,92 @@ Page({
           sportsData.deleteCustomSport(key);
           that.refresh();
           wx.showToast({ title: '已删除', icon: 'success' });
+        }
+      }
+    });
+  },
+
+  // ========== 蓝牙设备管理 ==========
+
+  onBLEScan: function () {
+    var that = this;
+    var foundMap = {};
+    this.setData({ bleScanning: true, bleScanList: [], bleState: 'scanning' });
+
+    bleHR.startScan(
+      function (device) {
+        // 去重
+        if (foundMap[device.deviceId]) return;
+        foundMap[device.deviceId] = true;
+
+        var list = that.data.bleScanList.slice();
+        list.push(device);
+        that.setData({ bleScanList: list });
+      },
+      function () {
+        // 扫描结束
+        that.setData({ bleScanning: false });
+        if (Object.keys(foundMap).length === 0) {
+          that.setData({ bleState: 'error' });
+          wx.showToast({ title: '未发现蓝牙设备', icon: 'none' });
+        }
+      }
+    );
+  },
+
+  onBLEStopScan: function () {
+    bleHR.stopScan();
+    this.setData({ bleScanning: false });
+  },
+
+  onBLESelect: function (e) {
+    var idx = e.currentTarget.dataset.index;
+    var device = this.data.bleScanList[idx];
+    if (!device) return;
+
+    var that = this;
+    bleHR.stopScan();
+    this.setData({ bleScanning: false, bleConnecting: true, bleState: 'connecting' });
+
+    var monitor = bleHR.createHRMonitor();
+    monitor.onStateChange(function (state, msg) {
+      if (state === 'connected') {
+        // 保存设备
+        storage.saveBLEDevice({
+          deviceId: device.deviceId,
+          name: device.name,
+          connectedAt: Date.now()
+        });
+        that.setData({ bleConnecting: false, bleState: 'connected', bleScanList: [] });
+        that.refresh();
+        wx.showToast({ title: '已连接 ' + device.name, icon: 'success' });
+        // 连接成功后断开（节省电量，骑行时再连）
+        monitor.disconnect();
+      } else if (state === 'error') {
+        that.setData({ bleConnecting: false, bleState: 'error' });
+        wx.showToast({ title: msg || '连接失败', icon: 'none' });
+      }
+    });
+    monitor.connect(device.deviceId, function (bpm) {
+      // 测试心率
+      console.log('[Settings] 测试心率:', bpm);
+    }, function (err) {
+      that.setData({ bleConnecting: false, bleState: 'error' });
+      wx.showToast({ title: err || '连接失败', icon: 'none' });
+    });
+  },
+
+  onBLEDisconnect: function () {
+    var that = this;
+    wx.showModal({
+      title: '取消配对',
+      content: '确定要取消与「' + (this.data.bleDevice.name || '设备') + '」的配对吗？',
+      confirmColor: '#F44336',
+      success: function (res) {
+        if (res.confirm) {
+          storage.removeBLEDevice();
+          that.setData({ bleDevice: null, bleState: '' });
+          wx.showToast({ title: '已取消配对', icon: 'success' });
         }
       }
     });

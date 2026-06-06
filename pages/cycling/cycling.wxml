@@ -24,17 +24,17 @@
     />
   </map>
 
-  <!-- ===== 顶部状态栏 ===== -->
-  <view class="top-bar">
-    <view class="top-bar-bg"></view>
-    <view class="top-status" bindtap="onBack">
-      <text class="back-icon">←</text>
-      <text class="top-title">骑行记录</text>
-    </view>
-  </view>
-
-  <!-- ===== 实时数据面板 ===== -->
+  <!-- ===== 实时数据面板（码表风格，占屏1/3，最顶层） ===== -->
   <view class="stats-panel">
+    <!-- 标题栏（替代原 top-bar） -->
+    <view class="stats-header-bar">
+      <text class="stats-header-back" bindtap="onBack">←</text>
+      <text class="stats-header-title">CYCLING</text>
+      <text class="stats-header-status {{stats.state === 'tracking' ? 'stats-header-status-active' : stats.state === 'paused' ? 'stats-header-status-paused' : ''}}">
+        {{stats.state === 'tracking' ? '● 骑行中' : stats.state === 'paused' ? '‖ 已暂停' : '○ 待开始'}}
+      </text>
+    </view>
+
     <!-- 主数据行 -->
     <view class="stats-main-row">
       <view class="stats-main-item">
@@ -68,10 +68,13 @@
         <text class="sub-value">{{stats.avgSpeed || 0}}</text>
         <text class="sub-label">均速</text>
       </view>
-      <view class="sub-item">
-        <text class="sub-icon">📍</text>
-        <text class="sub-value">{{stats.pointCount || 0}}</text>
-        <text class="sub-label">点</text>
+      <!-- 心率显示 -->
+      <view class="sub-item {{hrConnected ? 'sub-item-hr' : 'sub-item-hr-off'}}">
+        <text class="sub-icon">❤️</text>
+        <text wx:if="{{hrConnected}}" class="sub-value sub-value-hr">{{heartRate || '--'}}</text>
+        <text wx:if="{{!hrConnected && !hrConnecting}}" class="sub-value sub-value-hr-off">--</text>
+        <text wx:if="{{hrConnecting}}" class="sub-value sub-value-hr-connecting">···</text>
+        <text class="sub-label">bpm</text>
       </view>
     </view>
   </view>
@@ -132,6 +135,14 @@
       <view class="finish-stat-row">
         <text class="finish-stat-label">极速</text>
         <text class="finish-stat-value">{{finishPreview.max}} km/h</text>
+      </view>
+      <view wx:if="{{hrSampleCount > 0}}" class="finish-stat-row finish-stat-hr">
+        <text class="finish-stat-label">❤️ 平均心率</text>
+        <text class="finish-stat-value finish-stat-hr-val">{{hrAvgBpm}} bpm</text>
+      </view>
+      <view wx:if="{{hrSampleCount > 0}}" class="finish-stat-row">
+        <text class="finish-stat-label">❤️ 最高心率</text>
+        <text class="finish-stat-value">{{hrMaxBpm}} bpm</text>
       </view>
     </view>
     <view class="finish-btns">
